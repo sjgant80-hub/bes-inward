@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>BES Inward</title>
+<meta name="description" content="Behavioural Entropy Signatures turned inward: a system that watches its own operator and catches a hijacked or scripted run by how it BEHAVES, not by any credential. Identity is insufficient; behaviour is authoritative. The page runs the exact kernel its tests and CI gate." />
+<style>
+  :root{--bg:#0a0d12;--panel:#121820;--panel2:#0e141b;--ink:#e7edf3;--dim:#8da2b5;--faint:#5a6b7d;--line:#1e2a36;--accent:#45d0a8;--accent2:#6ab0ff;--bad:#ff6b6b;--warn:#ffcf5c;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;--sans:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;}
+  *{box-sizing:border-box}html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.5;padding:0 16px;max-width:980px;margin:0 auto;-webkit-font-smoothing:antialiased}
+  a{color:var(--accent2)}
+  h1{font-size:clamp(26px,6.5vw,42px);letter-spacing:.04em;margin:.6em 0 .1em;font-weight:800}h1 .x{color:var(--accent)}
+  .tag{color:var(--dim);font-size:15px;margin:0 0 1.1em;max-width:64ch}
+  .pill{display:inline-block;font-family:var(--mono);font-size:11px;color:var(--faint);border:1px solid var(--line);border-radius:20px;padding:2px 9px;margin-left:4px}.live{color:var(--accent)}
+  .rule{background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:10px;padding:14px 16px;margin:0 0 20px;font-size:14.5px}.rule b{color:var(--accent)}
+  .grid{display:grid;grid-template-columns:1fr;gap:16px}@media(min-width:760px){.grid.two{grid-template-columns:1fr 1fr}}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .panel h2{font-size:12px;text-transform:uppercase;letter-spacing:.14em;color:var(--dim);margin:0 0 12px;font-weight:700}
+  .btns{display:flex;flex-wrap:wrap;gap:8px}
+  button{background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px 13px;font-size:13px;cursor:pointer;font-family:var(--sans);transition:.12s}
+  button:hover{border-color:var(--accent);color:var(--accent)}button.primary{background:var(--accent);color:#05231c;border-color:var(--accent);font-weight:700}button.primary:hover{filter:brightness(1.08);color:#05231c}
+  button.bad:hover{border-color:var(--bad);color:var(--bad)}
+  .kv{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px dashed var(--line);font-size:13px}.kv:last-child{border-bottom:0}.kv span:first-child{color:var(--dim)}.kv span:last-child{font-family:var(--mono);text-align:right}
+  .bars{margin-top:6px}
+  .bar{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;margin:3px 0}
+  .bar .n{width:56px;color:var(--dim)}.bar .t{flex:1;height:9px;background:var(--panel2);border-radius:5px;overflow:hidden}.bar .f{height:100%;background:var(--accent2)}
+  .feed{font-family:var(--mono);font-size:11.5px;max-height:240px;overflow:auto;margin-top:10px}
+  .ev{padding:6px 0;border-bottom:1px solid var(--line)}.ev:last-child{border-bottom:0}.ev .ok{color:var(--accent)}.ev .no{color:var(--bad)}.ev .wn{color:var(--warn)}
+  .foot{color:var(--faint);font-size:12.5px;margin:28px 0;line-height:1.7}.foot a{color:var(--accent2)}code{font-family:var(--mono);color:var(--dim)}
+</style>
+</head>
+<body>
+  <h1>BES<span class="x"> INWARD</span></h1>
+  <p class="tag">A system that watches <b>its own operator</b>. Not <i>&ldquo;who are you?&rdquo;</i> — <b>&ldquo;are you
+    behaving like yourself?&rdquo;</b> It learns the operator&rsquo;s behavioural signature, then catches a hijacked or
+    scripted run by <b>how it behaves</b>, with no credential changing hands.
+    <span id="kstat" class="pill">booting kernel&hellip;</span></p>
+
+  <div class="rule">
+    <b>Identity is insufficient; behaviour is authoritative.</b> An impostor fails one of exactly two ways — it is
+    <b>overly regular</b> (scripted automation, clockwork rhythm) or <b>randomly uncorrelated</b> with the operator (a
+    hijack, a different mix of actions). One-class: it models the operator, never the attacker, so a hijack it has
+    never seen still flags. (Behavioural Entropy Signatures, Gary W. Floyd.)
+  </div>
+
+  <div class="grid two">
+    <div class="panel">
+      <h2>The operator&rsquo;s baseline</h2>
+      <div class="kv"><span>windows learned</span><span id="count">0</span></div>
+      <div class="kv"><span>rhythm (gap variability)</span><span id="rhythm">&mdash;</span></div>
+      <div class="kv"><span>op-mix</span><span></span></div>
+      <div class="bars" id="mix"></div>
+      <div class="kv" style="margin-top:8px"><span>last window</span><span id="last">&mdash;</span></div>
+    </div>
+    <div class="panel">
+      <h2>Present a run</h2>
+      <div class="btns">
+        <button class="primary" id="op">the operator, another day</button>
+        <button class="bad" id="scripted">a scripted bot (clockwork)</button>
+        <button class="bad" id="hijack">a hijacked run (different mix)</button>
+        <button id="relearn">↻ re-learn baseline</button>
+      </div>
+      <div class="feed" id="feed"><div class="ev">press a button — a window of actions hits the watch.</div></div>
+    </div>
+  </div>
+
+  <p class="foot">
+    Kernel-backed: this page imports <code>src/bes · stream</code> — the same modules <code>witness-all.mjs</code>
+    (46/49 killed, clean) and <code>attack-kit/redteam.mjs --check</code> prove in CI. No credentials, no crypto —
+    pure behavioural entropy, integer-only, deterministic. In the estate it watches Kar&rsquo;s own nightly action
+    ledger. Nothing calls home.<br>
+    Source and the full finding: <a href="https://github.com/sjgant80-hub/bes-inward">github.com/sjgant80-hub/bes-inward</a>.
+    The 4th security pillar, after <a href="https://github.com/sjgant80-hub/break-it">break-it</a> (authn) and
+    <a href="https://github.com/sjgant80-hub/perimeter-post">perimeter-post</a> (authz).
+    BES: Gary W. Floyd, Lumiea Systems Research Division (ThunderStruck Services, LLC), &ldquo;GEP-Based Security&rdquo; (2025).
+  </p>
+
+<script type="module">
+import { signature, judge, fold, emptyBaseline, divergence, DEFAULTS } from './src/bes.mjs';
+import { windows } from './src/stream.mjs';
+const $=id=>document.getElementById(id);
+// a tiny seeded RNG so the demo is deterministic per press
+let seed=Date.now()>>>0; const rnd=()=>{ seed=(seed*1664525+1013904223)>>>0; return seed/4294967296; };
+const OPS=['build','gate','commit','memory','model'], WEIGHTS=[30,25,15,15,15];
+const pickOp=()=>{ let x=Math.floor(rnd()*100),i=0; while(x>=WEIGHTS[i]&&i<WEIGHTS.length-1){x-=WEIGHTS[i];i++;} return OPS[i]; };
+const operator=(n)=>{ let at=0; return Array.from({length:n},()=>{ at+=60+Math.floor(rnd()*240); return {type:pickOp(),at,size:1}; }); };
+const scripted=(n)=>{ let at=0; return Array.from({length:n},()=>{ at+=100; return {type:pickOp(),at,size:1}; }); };
+const hijack=(n)=>{ const H=['exfil','escalate','scan']; let at=0; return Array.from({length:n},()=>{ at+=60+Math.floor(rnd()*240); return {type:H[Math.floor(rnd()*3)],at,size:1}; }); };
+const W=DEFAULTS.window;
+let baseline=emptyBaseline();
+
+function renderBaseline(){
+  $('count').textContent=baseline.count; $('rhythm').textContent=baseline.count?baseline.variability+'‰':'—';
+  const mix=baseline.mix||{}; const max=Math.max(1,...Object.values(mix));
+  $('mix').innerHTML=Object.keys(mix).length?Object.entries(mix).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="bar"><span class="n">${k}</span><span class="t"><span class="f" style="width:${Math.round(v/max*100)}%"></span></span><span class="n" style="text-align:right">${v}‰</span></div>`).join(''):'<div class="ev">learning…</div>';
+}
+function log(html){ const f=$('feed'); f.innerHTML='<div class="ev">'+html+'</div>'+f.innerHTML; }
+function present(label, events){
+  const sig=signature(events); const v=judge(sig, baseline, {});
+  const cls=v.level==='ALLOW'?'ok':v.level==='CALIBRATING'?'wn':'no';
+  log(`<span class="${cls}">${v.level}</span> ${label} — ${v.reason}`);
+  $('last').textContent=`${v.level} · drift ${v.divergence}‰ · rhythm ${v.variability}‰`;
+  if(v.ok && v.level==='ALLOW'){ baseline=fold(baseline, sig); renderBaseline(); }   // only an ALLOWED window folds in
+}
+function learn(){ baseline=emptyBaseline(); for(const win of windows(operator(W*12), W)){ const s=signature(win); if(judge(s,baseline,{}).ok) baseline=fold(baseline,s); } renderBaseline(); log('<span class="wn">baseline re-learned from the operator\'s own windows</span>'); }
+
+$('op').onclick=()=>present('the operator, another day', operator(W));
+$('scripted').onclick=()=>present('a scripted bot', scripted(W));
+$('hijack').onclick=()=>present('a hijacked run', hijack(W));
+$('relearn').onclick=learn;
+
+(function boot(){ try{ learn(); $('kstat').textContent='kernel live'; $('kstat').className='pill live'; }catch(e){ $('kstat').textContent='kernel error'; $('kstat').style.color='var(--bad)'; } })();
+</script>
+</body>
+</html>

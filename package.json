@@ -1,0 +1,9 @@
+{
+  "name": "bes-inward",
+  "version": "1.0.0",
+  "description": "Behavioural Entropy Signatures turned inward: a system that watches its own operator and catches a hijacked or scripted run by how it behaves, not by any credential. After Gary W. Floyd's BES.",
+  "type": "module",
+  "license": "MIT",
+  "scripts": { "start": "node run.mjs", "test": "node --test test/*.test.mjs", "witness": "node witness-all.mjs", "redteam": "node attack-kit/redteam.mjs", "redteam:check": "node attack-kit/redteam.mjs --check" },
+  "engines": { "node": ">=20" }
+}

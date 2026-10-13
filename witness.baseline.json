@@ -1,0 +1,17 @@
+[
+  {
+    "mutation": "&& → ||",
+    "snippet": "const p = { ...DEFAULTS, ...(params && typeof params === 'object' ? params : {}) };",
+    "reason": "params normalizer: with the mutation, a null/non-object params spreads via {...null} which is a no-op, so p === DEFAULTS exactly as in the original — the merged params object is identical for every input."
+  },
+  {
+    "mutation": "> → >=",
+    "snippet": "const clampNonNeg = (x) => (x > 0 ? x : 0);",
+    "reason": "equivalent: x>0?x:0 and x>=0?x:0 differ only at x===0, where both return 0 (the then-branch yields x===0, the else yields 0) — identical output for every input."
+  },
+  {
+    "mutation": "< → <=",
+    "snippet": "if (events.length < 2) return 0;",
+    "reason": "equivalent: they differ only at length===2, a single-gap window whose MAD is 0, so variability is 0 whether returned early (<=2) or computed (<2) — identical for every window."
+  }
+]

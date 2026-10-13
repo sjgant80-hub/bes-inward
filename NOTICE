@@ -1,0 +1,13 @@
+BES INWARD — credits and provenance
+
+Behavioral Entropy Signatures (BES) — "identity is insufficient; behaviour is authoritative" — are the
+work of GARY W. FLOYD, Lumiea Systems Research Division (subsidiary of ThunderStruck Services, LLC),
+New Caney, Texas, "GEP-Based Security: Behavioral Entropy Signatures for Cybersecurity and DevOps"
+(2025). The key finding reproduced here — that an impostor fails by being either overly regular
+(scripted) or randomly uncorrelated with the operator, and that a one-class rolling baseline needs no
+training corpus — is his.
+
+This build applies BES INWARD: the operator being watched is the running body itself, so a hijacked or
+prompt-injected run is caught by behaviour rather than credential. The kernel (bes.mjs), the streaming
+adapter and the proofs are original to this build and MIT licensed. The compression/codec lineage the
+estate builds on is Thomas Frumkin (Konomi).
