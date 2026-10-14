@@ -1,7 +1,7 @@
 // ════════════════════════════════════════════════════════════════
 // bes.mjs — BEHAVIORAL ENTROPY SIGNATURES, turned inward. Pure, total, integer-only, gated.
 //
-// Gary W. Floyd's BES (Lumiea Systems Research Division / ThunderStruck Services, "GEP-Based Security", 2025):
+// Gary W. Floyd's BES (Lumiea Systems Research Division / ThunderStruck Service, LLC, "GEP-Based Security", 2025):
 // identity is insufficient, BEHAVIOUR is authoritative. Not "who are you?" but "are you behaving like yourself?".
 // Here it watches a SINGLE operator — Kar, the running body itself — so a hijacked or prompt-injected run is caught
 // by how it BEHAVES, not by any credential it carries.

@@ -10,4 +10,4 @@ Live: https://sjgant80-hub.github.io/bes-inward/
 - test/*.test.mjs: unit + hostile-input (never-throw) suites.
 
 ## Lineage
-BES = Gary W. Floyd (Lumiea Systems Research Division, ThunderStruck Services, LLC, "GEP-Based Security", 2025). The 4th security pillar after break-it (authentication) and perimeter-post (authorization). Konomi / Thomas Frumkin credited. MIT.
+BES = Gary W. Floyd (Lumiea Systems Research Division, ThunderStruck Service, LLC, "GEP-Based Security", 2025). The 4th security pillar after break-it (authentication) and perimeter-post (authorization). Konomi / Thomas Frumkin credited. MIT.
