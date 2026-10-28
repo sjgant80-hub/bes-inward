@@ -4,6 +4,7 @@
 //
 //   node tools/personas.mjs <page-text-file> [model]   → receipts/personas.json (the questions and the model's lists)
 import { readFileSync, writeFileSync } from 'node:fs';
+import { request } from 'node:http';
 
 const [file, model = 'qwen2.5:7b'] = process.argv.slice(2);
 const page = readFileSync(file, 'utf8').replace(/\s+\n/g, '\n').slice(0, 22000);
@@ -15,21 +16,20 @@ const PERSONAS = [
   ['procurement and data-protection officer', 'who the supplier is, the licence, support terms, where personal data goes, and GDPR'],
 ];
 
-// streamed, so the headers arrive at once (a CPU 7B can take minutes to read the page before its first token)
-async function ask(prompt) {
-  const r = await fetch('http://127.0.0.1:11434/api/generate', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ model, prompt, stream: true, options: { num_ctx: 8192, temperature: 0.2 } }) });
-  const dec = new TextDecoder();
-  let buf = '', text = '';
-  for await (const chunk of r.body) {
-    buf += dec.decode(chunk, { stream: true });
-    let i;
-    while ((i = buf.indexOf('\n')) >= 0) {
-      const line = buf.slice(0, i);
-      buf = buf.slice(i + 1);
-      if (line.trim()) { try { text += JSON.parse(line).response || ''; } catch { /* a partial line */ } }
-    }
-  }
-  return text.trim();
+// node:http, not fetch: Ollama sends its headers only after it has read the whole prompt, which on a CPU 7B takes longer
+// than fetch's fixed five-minute header timeout. No bill and no wall here — it is the local model.
+function ask(prompt) {
+  return new Promise((resolve, reject) => {
+    const body = JSON.stringify({ model, prompt, stream: false, options: { num_ctx: 8192, temperature: 0.2 } });
+    const req = request({ host: '127.0.0.1', port: 11434, path: '/api/generate', method: 'POST', headers: { 'content-type': 'application/json', 'content-length': Buffer.byteLength(body) } }, (res) => {
+      let s = '';
+      res.setEncoding('utf8');
+      res.on('data', (d) => { s += d; });
+      res.on('end', () => { try { resolve(String(JSON.parse(s).response || '').trim()); } catch (e) { reject(e); } });
+    });
+    req.on('error', reject);
+    req.end(body);
+  });
 }
 
 const out = { kind: 'bes-layer.personas', v: 1, model, pageChars: page.length, walks: [] };
