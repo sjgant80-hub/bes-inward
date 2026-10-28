@@ -85,3 +85,4 @@ details summary{cursor:pointer;font-weight:600}
 footer{color:var(--dim);font-size:13px;border-top:1px solid var(--line);margin-top:40px;padding:20px 0 40px}
 code{font-family:var(--mono);font-size:.92em}
 .eq{font-family:var(--mono);background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;overflow-x:auto;white-space:nowrap;margin:6px 0}
+.gap-top{margin-top:12px}

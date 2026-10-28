@@ -72,7 +72,7 @@ const ORGANS = [
   ['src/bes.mjs', 'v1, the inward watch this layer grew from: op-mix and rhythm'],
 ];
 const wk = (src) => (WIT && Array.isArray(WIT.kernels) ? WIT.kernels.find((k) => k.src === src) : null);
-$('bptbl').querySelector('tbody').innerHTML = ORGANS.map(([src, what]) => { const w = wk(src); return '<tr><td><code>' + src + '</code></td><td>' + what + '</td><td>' + (w ? held(w.clean) + ' ' + w.killed + '/' + w.total + (w.ignored ? ' · ' + w.ignored + ' argued equivalent' : '') : '<span class="note">gated in CI</span>') + '</td></tr>'; }).join('');
+$('bptbl').querySelector('tbody').innerHTML = ORGANS.map(([src, what]) => { const w = wk(src); return '<tr><td><code>' + src + '</code></td><td>' + what + '</td><td>' + (w ? '<span class="chip ' + (w.clean ? 'held' : 'failed') + '">' + (w.clean ? 'CLEAN' : 'NOT CLEAN') + '</span> ' + w.killed + '/' + w.total + (w.ignored ? ' · ' + w.ignored + ' argued equivalent' : '') : '<span class="note">gated in CI</span>') + '</td></tr>'; }).join('');
 
 // ── 1 · grow the baselines ──
 const START = Date.UTC(2026, 6, 20), DAYS = 42, END = START + DAYS * DAY;

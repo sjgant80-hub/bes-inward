@@ -43,3 +43,8 @@ test('credits, verbatim; supplier; no private cosmology or reserved terms; no pr
   for (const bad of [/\bKCC\b/, /φ/, /κ/, /\bkappa\b/i, /golden ratio/i, /per (seat|node|month) for (BES|this)/i, /\/mo\b/, /priceCurrency/]) assert.doesNotMatch(html + app, bad);
   assert.match(text, /MIT, no licence fee/);
 });
+
+test('no inline style attribute: the CSP (style-src self) would block it', () => {
+  assert.doesNotMatch(html, /\sstyle="/);
+  assert.doesNotMatch(app, /setAttribute\('style'/);
+});
