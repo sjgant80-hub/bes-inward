@@ -6,7 +6,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 
 const [file, model = 'qwen2.5:7b'] = process.argv.slice(2);
-const page = readFileSync(file, 'utf8').replace(/\s+\n/g, '\n').slice(0, 14000);
+const page = readFileSync(file, 'utf8').replace(/\s+\n/g, '\n').slice(0, 22000);
 const PERSONAS = [
   ['CFO of a 40-person software firm', 'whether the cost case is believable, what it costs us in staff time, and what we stop paying for'],
   ['CTO / CISO', 'what exactly is checked, what it does not stop, how a false alarm is handled, and whether the claims are proven'],
