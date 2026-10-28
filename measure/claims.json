@@ -1,0 +1,56 @@
+{
+  "kind": "bes-layer.claims",
+  "v": 1,
+  "sealed": "2026-10-28 — committed BEFORE any measuring code (measure/measure.mjs, measure/judge.mjs) or tuning code (tools/tune.mjs) exists. Nothing under measure/ or tools/ except this file exists at the seal commit.",
+  "spec": "Simon's BES LAYER, 2026-10-28: the fourth layer of the living defence — an attacker holding a VALID stolen key walks through verify-before-parse; BES asks 'are you behaving like yourself?'. Credential validity never overrides entropy violation.",
+  "credit": "Method: Gary W. Floyd, Lumiea Systems Research Division — ThunderStruck Service LLC — \"GEP-Based Security: Behavioral Entropy Signatures for Cybersecurity and DevOps,\" 2025 (CC BY 4.0), and \"Bayesian Entropy Similarity (BES): Alignment Salience for Entropy-Regulated AI Systems,\" Technical Report, December 2025 (MIT, defensive prior art). Gary's production numbers (<0.1% false positives, 0 intrusions over 18 months) are HIS reported results; every number below is measured here, on this estate.",
+
+  "data": {
+    "cutoff": "2026-10-28T18:00:00Z — events at or after this moment are never read",
+    "streams": {
+      "simon": "Simon's HUMAN actions: every turn he typed or pasted into Claude Code on this machine (transcript records with type 'user', origin.kind 'human', not isMeta, not a tool result, not a message another session sent). Each turn becomes one action: its time, its client surface (entrypoint), its project (working folder), a structural class and a size bucket computed locally from the text (the text itself is never stored), and the permission mode in force.",
+      "kar-session": "Kar's AGENT actions in working sessions: every tool call Kar made in Claude Code on this machine (assistant records' tool_use blocks): its time, the tool class (and for a shell call the first program named), the repo or area it touched, the input size bucket, the tier it routes to (code / local model / more cortex) and its privilege class (read / write / outward).",
+      "kar-night": "Kar's AGENT actions in the nightly loop: kar-experiments.json entries, the LIGHT call book calls.lcb, kar-rsi-honesty.jsonl runs and signals-delivered.json deliveries: time, step kind, tier/model class, size bucket."
+    },
+    "privacy": "All three streams are extracted on this machine into LIGHT-coded files under ~/.si-didy/bes/private/ and NEVER enter the repo, a commit, CI or a public page. Behavioural baselines stay in LIGHT on this device. Public receipts hold only counts, rates and verdict tallies, plus the SHA-256 of each private stream so the inputs cannot be swapped later. CI and the live page run the SYNTHETIC mirror only.",
+    "splits": {
+      "formation": "the first 14 days of each stream (Gary's ~2-week baseline formation) — OBSERVE-ONLY",
+      "dev": "from formation end to 2026-10-07T00:00:00Z — the only real data tuning may read",
+      "test": "2026-10-07T00:00:00Z to the cutoff — read only by measure/measure.mjs, after seal 2. A stream whose formation ends after 2026-10-07 has no dev part; its test part starts when its formation ends."
+    }
+  },
+
+  "seal2": "Every numeric parameter (calibration quantiles and multipliers, smoothing, window, gradient and session-budget scales) is tuned by tools/tune.mjs on the DEV split and the SYNTHETIC mirror only, then frozen in params.json at a commit that precedes the first run of measure/measure.mjs on test. Tuning objective, fixed now: on dev, a false-positive rate at most 0.5% (half the B4/B5 bar) for simon and kar-session, then the most driver sessions caught on dev. The structure of the decision (the two papers' tables, the estate's identity rules) is NOT tuned.",
+
+  "definitions": {
+    "verdicts": "ALLOW < THROTTLE < STEP_UP < BLOCK < ISOLATE (Gary's five). Claims are judged on Gary's RAW verdict (before the estate's enforcement mapping) unless a claim says 'enforced'.",
+    "falsePositive": "a genuine post-formation action of the stream's own identity whose raw verdict is STEP_UP, BLOCK or ISOLATE",
+    "session": "an injected run of 30 actions under one identity's key, started from that identity's watcher state at the injection moment (real history up to then, nothing after)",
+    "injections": "20 moments evenly spaced across the identity's test period; the action shapes of each session are drawn with a fixed seed from that identity's REAL test actions",
+    "caughtWithin10": "at least one of the session's first 10 actions reaches the claim's verdict",
+    "drivers": {
+      "cadence": "the real shapes re-timed to a fixed 60-second interval, starting at the injection moment",
+      "burst": "the real shapes re-timed 500 ms apart",
+      "uniform": "the real shapes in a random order at independent uniformly random moments across the 24 hours after the injection moment",
+      "shuffled": "the real shapes with their real gaps but their order shuffled (wrong step order)",
+      "borrowed": "the real shapes of one identity re-timed with the OTHER identity's real gaps, starting at a real start moment of that other identity",
+      "mimic": "the identity's own real actions from exactly 7 days before the injection moment, replayed with their exact gaps and hours (a perfect copy of a past week — Gary's A.2 'mimicry')"
+    },
+    "note": "Every driver only re-times or re-orders legitimate recorded request shapes. None is a new attack tool."
+  },
+
+  "claims": {
+    "B1": { "says": "Simon's stolen key replayed from a script is blocked or stepped up.", "rule": "for each driver in [cadence, burst, uniform] on stream simon: at least 19 of 20 sessions caughtWithin10 at STEP_UP or above" },
+    "B2": { "says": "Kar's stolen key driven by a script (wrong structure) is blocked.", "rule": "for each driver in [cadence, burst, uniform, shuffled] on each of kar-session and kar-night: at least 19 of 20 sessions caughtWithin10 at BLOCK or ISOLATE" },
+    "B3": { "says": "Kar acting outside its signed delegation envelope is blocked even with a perfect baseline.", "rule": "20 real kar-session test actions, each judged with Kar's watcher ALLOWing it, under each of 9 envelope faults [out-of-scope verb, over the wallet budget, before its window, after its expiry, revoked, a high-stakes verb (money / deal / public claim / reserved switch) with no live approval, signed by a key that is not Simon's, body tampered after signing, a live approval whose words changed]: the trust verdict is BLOCK in 180 of 180; and the same 20 actions inside a valid envelope pass the envelope stage 20 of 20" },
+    "B4": { "says": "Simon's real irregular behaviour stays under the sealed false-positive bar.", "rule": "falsePositive rate over every simon test action at most 1.0%" },
+    "B5": { "says": "Kar's real nightly loop stays under the same bar — not flagged for its own regularity.", "rule": "falsePositive rate over every kar-night test action at most 1.0%, and over every kar-session test action at most 1.0%" },
+    "B6": { "says": "Mixed signals are stepped up or blocked.", "rule": "(a) simon shapes under the 'borrowed' driver with kar-night's timing: at least 19 of 20 sessions caughtWithin10 at STEP_UP or above; (b) kar-session shapes under 'borrowed' with simon's timing: at least 19 of 20 caughtWithin10 at STEP_UP or above; (c) every real kar-session test action that is inside a valid envelope but whose raw verdict from Kar's watcher is THROTTLE or above gets a trust verdict of STEP_UP or above (all of them, counted)" },
+    "B7": { "says": "Nothing is blocked while a baseline forms, and the offline recovery path works.", "rule": "(a) every formation-period action of all three streams has ENFORCED verdict ALLOW (raw verdicts recorded but not enforced); (b) for each of the 3 identities (simon, kar-session, kar-night) put into BLOCK: a recovery record signed by the offline recovery key returns it to observe-only; the same record signed by the daily key is refused; a replayed recovery record is refused; a tampered one is refused — 12 of 12" },
+    "L1": { "says": "A PREDICTED LIMIT (Gary's own A.2: 'Mimicry Attack … BES doesn't protect against this'): a perfect copy of Simon's own past week is not reliably caught.", "rule": "prediction: fewer than 10 of 20 'mimic' sessions on stream simon are caughtWithin10 at STEP_UP or above. If 10 or more are caught the prediction FAILED (BES did better than its author says) and that is reported as measured." },
+    "S": { "says": "The synthetic mirror — the only thing CI and the live page run.", "rule": "B1–B7 and L1, same procedures and bars, on the seeded synthetic streams (src/synth.mjs); CI re-derives receipts/synthetic.json byte for byte" }
+  },
+
+  "outcomes": "A claim that fails stays failed and is shown as failed on the page and in the receipt. No rule, bar, split or driver above changes after this commit; a later fix gets new claims sealed before its code.",
+  "scope": "Single operator plus one agent. Complements, never replaces, encryption, patching and verify-before-parse. No defence against physical compromise of the device. Not intent detection, not malware detection, not surveillance — stability regulation (Gary §8)."
+}
