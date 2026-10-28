@@ -1,9 +1,16 @@
 {
   "name": "bes-inward",
-  "version": "1.0.0",
-  "description": "Behavioural Entropy Signatures turned inward: a system that watches its own operator and catches a hijacked or scripted run by how it behaves, not by any credential. After Gary W. Floyd's BES.",
+  "version": "2.0.0",
+  "description": "The BES layer: a valid key is not enough — every action must also look like its holder (the owner's own baseline, his AI agent's own baseline) and the agent may act only inside an envelope the owner signed. After Gary W. Floyd's Behavioral Entropy Signatures and Bayesian Entropy Similarity.",
   "type": "module",
   "license": "MIT",
-  "scripts": { "start": "node run.mjs", "test": "node --test test/*.test.mjs", "witness": "node witness-all.mjs", "redteam": "node attack-kit/redteam.mjs", "redteam:check": "node attack-kit/redteam.mjs --check" },
-  "engines": { "node": ">=20" }
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "witness": "node witness-all.mjs",
+    "vendor:check": "node tools/vendor.mjs --check",
+    "measure:synthetic": "node measure/measure.mjs --synthetic --check",
+    "redteam:check": "node attack-kit/redteam.mjs --check",
+    "start": "node run.mjs"
+  },
+  "engines": { "node": ">=22" }
 }

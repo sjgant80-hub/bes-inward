@@ -1,13 +1,15 @@
-# BES Inward
+# BES — the behaviour layer
 
-> Behavioural Entropy Signatures turned inward. A system watches its own operator and asks "are you behaving like yourself?" instead of "who are you?". It learns the operator's behavioural signature (the mix of actions + the rhythm of them) as a one-class rolling baseline, then flags a run that is either too regular (scripted automation) or too far from the operator's mix (a hijack) — by behaviour, no credential. The baseline only folds in windows it already allowed, so an impostor cannot poison it (negative selection).
+> A stolen key still works; its thief's behaviour doesn't. The BES layer checks every validly signed action against how its holder really behaves — the owner's own baseline, his AI agent's own baseline, and a delegation envelope the owner signed — and steps up or blocks a valid key in the wrong hands. Layer 3 of four: verify-before-parse, the LIGHT barrier, BES, the immune system and tarpit.
 
-Live: https://sjgant80-hub.github.io/bes-inward/
+- Live page (runs the real kernels on synthetic behaviour, explains itself, carries the brochure and white paper): https://sjgant80-hub.github.io/bes-inward/
+- Sealed claims (committed before the measuring code): https://github.com/sjgant80-hub/bes-inward/blob/main/measure/claims.json
+- Real-behaviour receipt (counts and rates only): https://github.com/sjgant80-hub/bes-inward/blob/main/receipts/real.json
+- Synthetic receipt (CI reproduces it byte for byte): https://github.com/sjgant80-hub/bes-inward/blob/main/receipts/synthetic.json
+- Source: https://github.com/sjgant80-hub/bes-inward
 
-## Proof (re-runnable)
-- attack-kit/redteam.mjs --check: 6 cases, byte-identical — operator's own varied behaviour passes (low FP); scripted flagged (too regular); hijack flagged (uncorrelated); baseline unpoisonable; calibrates while learning; fails closed.
-- witness-all.mjs: mutation + fuzz gate over bes.mjs — CLEAN, 46/49 killed, 3 reviewed-equivalent.
-- test/*.test.mjs: unit + hostile-input (never-throw) suites.
-
-## Lineage
-BES = Gary W. Floyd (Lumiea Systems Research Division, ThunderStruck Service, LLC, "GEP-Based Security", 2025). The 4th security pillar after break-it (authentication) and perimeter-post (authorization). Konomi / Thomas Frumkin credited. MIT.
+## Credits
+- Gary W. Floyd, Lumiea Systems Research Division — ThunderStruck Service LLC — "GEP-Based Security: Behavioral Entropy Signatures for Cybersecurity and DevOps," 2025 (CC BY 4.0).
+- Gary W. Floyd, Lumiea Systems Research Division — ThunderStruck Service LLC — "Bayesian Entropy Similarity (BES): Alignment Salience for Entropy-Regulated AI Systems," Technical Report, December 2025 (MIT).
+- Powered by the Konomi architecture, created by Thomas Frumkin.
+- Supplier: AI Native Solutions — https://www.ai-nativesolutions.com · MIT, no licence fee.

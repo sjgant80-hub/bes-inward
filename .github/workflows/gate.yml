@@ -5,11 +5,32 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
-        with: { node-version: '20' }
-      - name: unit + hostile-input (never-throw) suites
-        run: node --test test/*.test.mjs
-      - name: the BES red-team re-runs and must reproduce its receipt byte-for-byte
+        with:
+          node-version: '22'
+      - name: vendored kernels are byte-identical to their pinned commits
+        run: node tools/vendor.mjs --check
+      - name: unit and hostile-input suites
+        run: |
+          node --test test/*.test.mjs
+      - name: the v1 red-team reproduces its receipt byte for byte
         run: node attack-kit/redteam.mjs --check
-      - name: mutation + fuzz gate over the BES kernel (no unreviewed survivors)
-        run: node witness-all.mjs
+      - name: the synthetic measurement of the sealed claims reproduces its receipt byte for byte
+        run: |
+          node measure/measure.mjs --synthetic --check
+  witness:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        kernel: [bes, entropy, gep, watch, trust, envelope, recovery, drivers, stack, store, judge, cost]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: mutation and fuzz gate, no unreviewed survivors, nothing capped
+        run: |
+          node witness-all.mjs ${{ matrix.kernel }}

@@ -1,0 +1,24 @@
+{
+ "v": 1,
+ "read": "2026-10-28",
+ "rule": "Every figure here is a published list price or statistic, read from its primary page on the date given (the break-it figures were read on 2026-10-25 and are carried with their own date). The cost case multiplies them by the buyer's own numbers. None of it is a price for the BES layer, which is MIT-licensed with no licence fee.",
+ "prices": {
+  "entraP2CentsPerUserMonth": 1000,
+  "fx10k": 13363,
+  "unitRateCentiPence": 2632,
+  "laptopMaxWatts": 55,
+  "breachUsd": 4990000,
+  "nlwPence": 1271,
+  "cyberMedianPounds": 54647
+ },
+ "sources": [
+  { "id": "entra-p2", "what": "Microsoft Entra ID P2 (includes Microsoft Entra ID Protection and risk-based Conditional Access): US$10.00 per user per month, paid yearly, annual subscription that renews automatically", "url": "https://www.microsoft.com/en-us/security/business/microsoft-entra-pricing", "read": "2026-10-28", "quote": "$10.00 user/month, paid yearly" },
+  { "id": "boe-fx", "what": "Bank of England spot rate, US$ into sterling (XUDLUSS), 22 October 2026: 1.3363 dollars to the pound", "url": "https://www.bankofengland.co.uk/boeapps/database/", "read": "2026-10-25", "quote": "carried from break-it costs/sources.json" },
+  { "id": "ofgem-cap", "what": "Ofgem price cap, electricity, direct debit, Great Britain average, 1 October to 31 December 2026: 26.32p per kWh (no VAT on electricity in that period)", "url": "https://www.ofgem.gov.uk/information-consumers/energy-advice-households/get-energy-price-cap-standing-charges-and-unit-rates-region", "read": "2026-10-25", "quote": "carried from break-it costs/sources.json" },
+  { "id": "intel-i7-1255u", "what": "Intel Core i7-1255U, the laptop chip this was built and measured on: Maximum Turbo Power 55 W — the case uses the most the chip can draw, so it never understates the electricity", "url": "https://www.intel.com/content/www/us/en/products/sku/226259/intel-core-i71255u-processor-12m-cache-up-to-4-70-ghz/specifications.html", "read": "2026-10-25", "quote": "carried from break-it costs/sources.json" },
+  { "id": "ibm-breach", "what": "IBM and Ponemon Institute, Cost of a Data Breach Report 2026: the global average cost of a data breach is US$4.99 million, a record high", "url": "https://www.ibm.com/reports/data-breach", "read": "2026-10-28", "quote": "The global average cost of a data breach, in USD: 4.99M" },
+  { "id": "verizon-dbir", "what": "Verizon 2026 Data Breach Investigations Report (incidents 1 November 2024 – 31 October 2025): 31% of breaches now start with software vulnerabilities, 'beating stolen passwords as the top way attackers get in' — stolen credentials were the top way in until this edition", "url": "https://www.verizon.com/business/resources/reports/dbir/", "read": "2026-10-28", "quote": "of breaches now start with software vulnerabilities, beating stolen passwords as the top way attackers get in" },
+  { "id": "uk-nlw", "what": "National Living Wage (21 and over), £12.71 an hour from 1 April 2026 — the floor the case puts on a person's time answering a step-up", "url": "https://www.gov.uk/government/news/national-living-wage-increases-to-1271-per-hour", "read": "2026-10-25", "quote": "carried from break-it costs/sources.json" },
+  { "id": "ons-cyber", "what": "ONS ASHE, UK median annual pay, SOC 2135 Cyber security professionals: £54,647", "url": "https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork/earningsandworkinghours/datasets/occupation4digitsoc2010ashetable14", "read": "2026-10-28", "quote": "carried from the estate's fallfloor-enterprise prices.lock.json registry" }
+ ]
+}

@@ -1,0 +1,34 @@
+{
+ "kind": "bes-layer.params",
+ "v": 1,
+ "chosenBy": "tools/tune.mjs on dev data only (objective sealed in measure/claims.json seal2)",
+ "rule": "FALLBACK: no configuration met 0.5% on both — smallest larger dev FP (3.84%), within 0.1 point, most caught",
+ "params": {
+  "W": 20,
+  "mEps": 3,
+  "mKl": 3,
+  "mGrad": 3,
+  "barAlpha": 0.2
+ },
+ "dev": {
+  "simon": {
+   "fpRate": 0.03843,
+   "shiftPrompts": 3,
+   "caught": {
+    "cadence": 18,
+    "burst": 18,
+    "uniform": 11
+   }
+  },
+  "kar-session": {
+   "fpRate": 0.00105,
+   "shiftPrompts": 0,
+   "caught": {
+    "cadence": 20,
+    "burst": 20,
+    "uniform": 0,
+    "shuffled": 0
+   }
+  }
+ }
+}

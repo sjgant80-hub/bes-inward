@@ -2,3 +2,5 @@
 *.png binary
 *.jpg binary
 *.ico binary
+vendor/** -text
+*.light binary

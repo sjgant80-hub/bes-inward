@@ -1,0 +1,71 @@
+{
+ "kind": "bes-inward.vendor",
+ "v": 1,
+ "note": "Copied verbatim from git objects at the commit named. Never edit a vendored file; re-vendor.",
+ "files": [
+  {
+   "path": "fall-kit-core/identity.mjs",
+   "repo": "sjgant80-hub/fall-kit",
+   "commit": "9244d6128c7be0094c9d800acac0a9ee70ecdd97",
+   "src": "core/identity.mjs",
+   "sha256": "429caa25bf0e104f6a664224d81fd8215d2f6c79aad3323a8acb476f85a3856e",
+   "what": "one Ed25519 key in every form the kernels take it (WebCrypto)"
+  },
+  {
+   "path": "fall-kit-core/vendor/light/packet.mjs",
+   "repo": "sjgant80-hub/fall-kit",
+   "commit": "9244d6128c7be0094c9d800acac0a9ee70ecdd97",
+   "src": "core/vendor/light/packet.mjs",
+   "sha256": "d565bdabdbfc063bf952d1e20cdb14c5564041667c60a560a56f930aff6e5245",
+   "what": "LIGHT: the signed packet and its verify-before-decode door (layers 1 and 2)"
+  },
+  {
+   "path": "fall-kit-core/vendor/light/codec.mjs",
+   "repo": "sjgant80-hub/fall-kit",
+   "commit": "9244d6128c7be0094c9d800acac0a9ee70ecdd97",
+   "src": "core/vendor/light/codec.mjs",
+   "sha256": "4f018272a05989fe8fbd0f675e0460b35365710a174a88dbf628165ef21f431d",
+   "what": "LIGHT: the lossless codec the baselines are stored in"
+  },
+  {
+   "path": "fall-kit-core/vendor/light/sha256.mjs",
+   "repo": "sjgant80-hub/fall-kit",
+   "commit": "9244d6128c7be0094c9d800acac0a9ee70ecdd97",
+   "src": "core/vendor/light/sha256.mjs",
+   "sha256": "cf60afffd36df071b277da214ed61a7b3f4923e443bfadb06656bb7da4756bc1",
+   "what": "SHA-256, pure"
+  },
+  {
+   "path": "fall-kit-core/vendor/wallet/wallet.mjs",
+   "repo": "sjgant80-hub/fall-kit",
+   "commit": "9244d6128c7be0094c9d800acac0a9ee70ecdd97",
+   "src": "core/vendor/wallet/wallet.mjs",
+   "sha256": "9a01dcb6134cdf724e1717b757fca7843544137e0c6051510a1d15682c6166f6",
+   "what": "the wallet: capability + a budget it cannot cross (the envelope budget)"
+  },
+  {
+   "path": "break-it/wire.mjs",
+   "repo": "sjgant80-hub/break-it",
+   "commit": "badc6ff158b60b764aae68b3deae18014f4b5480",
+   "src": "src/wire.mjs",
+   "sha256": "023eb7e5ed779a8018ca82c8d5952e4dab7292ae8af9c5e83e34e8586ef679a5",
+   "what": "break-it wire constants the immune fingerprint reads"
+  },
+  {
+   "path": "break-it/immune.mjs",
+   "repo": "sjgant80-hub/break-it",
+   "commit": "badc6ff158b60b764aae68b3deae18014f4b5480",
+   "src": "src/immune.mjs",
+   "sha256": "e5435045b0302bcb322a6a16305366b4a716a3b1b71c5e8b77050bcb6cce38c8",
+   "what": "the immune system: every refusal becomes memory (layer 4)"
+  },
+  {
+   "path": "break-it/rebound.mjs",
+   "repo": "sjgant80-hub/break-it",
+   "commit": "badc6ff158b60b764aae68b3deae18014f4b5480",
+   "src": "src/rebound.mjs",
+   "sha256": "0bb4c77219dab7594ec65aa1ce47c1765ae3e2889c30e764cf8ed29cee364134",
+   "what": "the rebound: proof-of-work owed by a source refused too often — the tarpit (layer 4)"
+  }
+ ]
+}

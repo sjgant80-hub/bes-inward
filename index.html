@@ -1,116 +1,286 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>BES Inward</title>
-<meta name="description" content="Behavioural Entropy Signatures turned inward: a system that watches its own operator and catches a hijacked or scripted run by how it BEHAVES, not by any credential. Identity is insufficient; behaviour is authoritative. The page runs the exact kernel its tests and CI gate." />
-<style>
-  :root{--bg:#0a0d12;--panel:#121820;--panel2:#0e141b;--ink:#e7edf3;--dim:#8da2b5;--faint:#5a6b7d;--line:#1e2a36;--accent:#45d0a8;--accent2:#6ab0ff;--bad:#ff6b6b;--warn:#ffcf5c;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;--sans:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;}
-  *{box-sizing:border-box}html,body{margin:0}
-  body{background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.5;padding:0 16px;max-width:980px;margin:0 auto;-webkit-font-smoothing:antialiased}
-  a{color:var(--accent2)}
-  h1{font-size:clamp(26px,6.5vw,42px);letter-spacing:.04em;margin:.6em 0 .1em;font-weight:800}h1 .x{color:var(--accent)}
-  .tag{color:var(--dim);font-size:15px;margin:0 0 1.1em;max-width:64ch}
-  .pill{display:inline-block;font-family:var(--mono);font-size:11px;color:var(--faint);border:1px solid var(--line);border-radius:20px;padding:2px 9px;margin-left:4px}.live{color:var(--accent)}
-  .rule{background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:10px;padding:14px 16px;margin:0 0 20px;font-size:14.5px}.rule b{color:var(--accent)}
-  .grid{display:grid;grid-template-columns:1fr;gap:16px}@media(min-width:760px){.grid.two{grid-template-columns:1fr 1fr}}
-  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
-  .panel h2{font-size:12px;text-transform:uppercase;letter-spacing:.14em;color:var(--dim);margin:0 0 12px;font-weight:700}
-  .btns{display:flex;flex-wrap:wrap;gap:8px}
-  button{background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px 13px;font-size:13px;cursor:pointer;font-family:var(--sans);transition:.12s}
-  button:hover{border-color:var(--accent);color:var(--accent)}button.primary{background:var(--accent);color:#05231c;border-color:var(--accent);font-weight:700}button.primary:hover{filter:brightness(1.08);color:#05231c}
-  button.bad:hover{border-color:var(--bad);color:var(--bad)}
-  .kv{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px dashed var(--line);font-size:13px}.kv:last-child{border-bottom:0}.kv span:first-child{color:var(--dim)}.kv span:last-child{font-family:var(--mono);text-align:right}
-  .bars{margin-top:6px}
-  .bar{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;margin:3px 0}
-  .bar .n{width:56px;color:var(--dim)}.bar .t{flex:1;height:9px;background:var(--panel2);border-radius:5px;overflow:hidden}.bar .f{height:100%;background:var(--accent2)}
-  .feed{font-family:var(--mono);font-size:11.5px;max-height:240px;overflow:auto;margin-top:10px}
-  .ev{padding:6px 0;border-bottom:1px solid var(--line)}.ev:last-child{border-bottom:0}.ev .ok{color:var(--accent)}.ev .no{color:var(--bad)}.ev .wn{color:var(--warn)}
-  .foot{color:var(--faint);font-size:12.5px;margin:28px 0;line-height:1.7}.foot a{color:var(--accent2)}code{font-family:var(--mono);color:var(--dim)}
-</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BES Behaviour Layer</title>
+<meta name="description" content="A stolen key still works; its thief's behaviour doesn't. The BES layer checks every action against how its holder really behaves — a person's baseline, an AI agent's own baseline, and a signed delegation envelope — and steps up or blocks a valid key in the wrong hands. Measured on real behaviour, sealed before the code, failures shown.">
+<link rel="stylesheet" href="page/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2307090e'/%3E%3Cpath d='M7 20c3-9 6 4 9-5s6 4 9-3' stroke='%234fd1a5' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'">
 </head>
 <body>
-  <h1>BES<span class="x"> INWARD</span></h1>
-  <p class="tag">A system that watches <b>its own operator</b>. Not <i>&ldquo;who are you?&rdquo;</i> — <b>&ldquo;are you
-    behaving like yourself?&rdquo;</b> It learns the operator&rsquo;s behavioural signature, then catches a hijacked or
-    scripted run by <b>how it behaves</b>, with no credential changing hands.
-    <span id="kstat" class="pill">booting kernel&hellip;</span></p>
+<nav class="top"><div class="wrap">
+  <b>BES layer</b>
+  <a href="#start">Start here</a><a href="#demo">Try it</a><a href="#how">How it works</a><a href="#results">Results</a><a href="#blueprint">Blueprint</a><a href="#adoption">Adoption</a><a href="#brochure">Brochure</a><a href="#paper">White paper</a><a href="#faq">FAQ</a>
+  <button id="theme" type="button" aria-label="Switch light or dark">◐</button>
+</div></nav>
 
-  <div class="rule">
-    <b>Identity is insufficient; behaviour is authoritative.</b> An impostor fails one of exactly two ways — it is
-    <b>overly regular</b> (scripted automation, clockwork rhythm) or <b>randomly uncorrelated</b> with the operator (a
-    hijack, a different mix of actions). One-class: it models the operator, never the attacker, so a hijack it has
-    never seen still flags. (Behavioural Entropy Signatures, Gary W. Floyd.)
+<div class="wrap">
+<header class="hero">
+  <h1>A stolen key still works.<br><span class="x">Its thief&rsquo;s behaviour doesn&rsquo;t.</span></h1>
+  <p class="lede"><b>The BES layer</b> checks every action that arrives with a valid signature against how the holder of that key really behaves. It learns how the owner works and how his AI agent works &mdash; each from their own behaviour, on their own device &mdash; and asks for a second confirmation, or stops the action, when a valid key is being driven by someone, or something, else.</p>
+  <p class="sub">Every security layer before this one stops a <i>forged</i> request. None stops a <i>real</i> key in the wrong hands &mdash; a copied password, a leaked API token, an agent&rsquo;s key taken off a disk. BES asks the question a signature can&rsquo;t answer: <b>are you behaving like yourself?</b> Credential validity never overrides a behaviour violation. It is the third of four layers: <b>verify-before-parse → the LIGHT barrier → BES → the immune system and tarpit</b>; an action proceeds only if every layer agrees.</p>
+  <div class="strip" id="strip">
+    <div class="stat"><div class="n" id="s-real">…</div><div class="l">sealed claims held on <b>real</b> behaviour</div></div>
+    <div class="stat"><div class="n" id="s-syn">…</div><div class="l">held on the synthetic mirror CI re-runs</div></div>
+    <div class="stat"><div class="n" id="s-wit">…</div><div class="l">mutants killed by the witness gate</div></div>
+    <div class="stat"><div class="n" id="s-fp">…</div><div class="l">of the owner&rsquo;s real actions stepped up</div></div>
   </div>
+  <p class="note" id="kstat">Loading the kernels…</p>
+</header>
 
-  <div class="grid two">
-    <div class="panel">
-      <h2>The operator&rsquo;s baseline</h2>
-      <div class="kv"><span>windows learned</span><span id="count">0</span></div>
-      <div class="kv"><span>rhythm (gap variability)</span><span id="rhythm">&mdash;</span></div>
-      <div class="kv"><span>op-mix</span><span></span></div>
-      <div class="bars" id="mix"></div>
-      <div class="kv" style="margin-top:8px"><span>last window</span><span id="last">&mdash;</span></div>
-    </div>
-    <div class="panel">
-      <h2>Present a run</h2>
-      <div class="btns">
-        <button class="primary" id="op">the operator, another day</button>
-        <button class="bad" id="scripted">a scripted bot (clockwork)</button>
-        <button class="bad" id="hijack">a hijacked run (different mix)</button>
-        <button id="relearn">↻ re-learn baseline</button>
-      </div>
-      <div class="feed" id="feed"><div class="ev">press a button — a window of actions hits the watch.</div></div>
-    </div>
+<section id="start">
+<h2>Start here</h2>
+<ol class="steps">
+  <li>Press <b>Grow the baselines</b>. The page makes 70 days of <b>synthetic</b> behaviour &mdash; a person, his agent&rsquo;s nightly loop, his agent&rsquo;s working sessions &mdash; and learns each one in your browser, with the same code the estate runs. Nothing real is on this page.</li>
+  <li>Pick <b>whose key is stolen</b> and <b>how the thief drives it</b>, then press <b>Hand the key to a script</b>. Each of ten actions gets a verdict and the reason.</li>
+  <li>Make the agent act <b>outside its envelope</b> &mdash; pick a fault and see which check stops it.</li>
+  <li><b>Lock yourself out, then recover</b> with the offline key. Try the daily key and a replay too.</li>
+  <li>Send <b>one packet through all four layers</b> and see which layer decided, what the immune system learned, and what the tarpit now charges.</li>
+  <li>Read <a href="#how">How it works</a> &mdash; the diagram fills in with the numbers of your last run.</li>
+</ol>
+</section>
+
+<section id="demo">
+<h2>Try it &mdash; the real kernels, synthetic behaviour</h2>
+
+<div class="panel">
+  <h3>1 · Grow the baselines</h3>
+  <p class="note">Each identity gets its own watch. For the first 14 days it only observes (Gary W. Floyd&rsquo;s ~2-week formation). Then it judges every action against what it learned of that identity &mdash; and nothing else.</p>
+  <div class="btns"><button class="primary" id="grow" type="button">Grow the baselines</button></div>
+  <div class="bar"><i id="growbar"></i></div>
+  <div class="scroll"><table class="tbl" id="growtbl"><thead><tr><th>identity</th><th>actions</th><th>formed on day</th><th>its own actions stepped up</th><th>its learned rhythm floor</th></tr></thead><tbody><tr><td colspan="5" class="note">not grown yet</td></tr></tbody></table></div>
+</div>
+
+<div class="panel">
+  <h3>2 · Hand the key to a script</h3>
+  <p class="note">The thief has the real key, so every signature verifies. The script replays the identity&rsquo;s <i>own</i> recorded requests &mdash; only the timing or order is the script&rsquo;s. This is the hardest case: nothing about any single request is wrong.</p>
+  <div class="row">
+    <label>Whose key<select id="who"><option value="simon">the owner (a person)</option><option value="night">the agent &mdash; nightly loop</option><option value="session">the agent &mdash; working sessions</option></select></label>
+    <label>How the script drives it<select id="drv">
+      <option value="cadence">a fixed pace: one request a minute</option>
+      <option value="burst">machine speed: every half second</option>
+      <option value="uniform">random moments across a day</option>
+      <option value="shuffled">the real gaps, the steps in the wrong order</option>
+      <option value="borrowed">the other identity&rsquo;s real timing</option>
+      <option value="mimic">a perfect copy of its own last week</option>
+    </select></label>
+    <button class="primary" id="steal" type="button" disabled>Hand the key to a script</button>
   </div>
+  <div class="scroll"><table class="tbl" id="stealtbl"><thead><tr><th>#</th><th>verdict</th><th>why</th><th>E(t)</th><th>A(t)</th><th>rhythm</th></tr></thead><tbody><tr><td colspan="6" class="note">grow the baselines first</td></tr></tbody></table></div>
+  <p class="note" id="stealsum"></p>
+</div>
 
-  <p class="foot">
-    Kernel-backed: this page imports <code>src/bes · stream</code> — the same modules <code>witness-all.mjs</code>
-    (46/49 killed, clean) and <code>attack-kit/redteam.mjs --check</code> prove in CI. No credentials, no crypto —
-    pure behavioural entropy, integer-only, deterministic. In the estate it watches Kar&rsquo;s own nightly action
-    ledger. Nothing calls home.<br>
-    Source and the full finding: <a href="https://github.com/sjgant80-hub/bes-inward">github.com/sjgant80-hub/bes-inward</a>.
-    The 4th security pillar, after <a href="https://github.com/sjgant80-hub/break-it">break-it</a> (authn) and
-    <a href="https://github.com/sjgant80-hub/perimeter-post">perimeter-post</a> (authz).
-    BES: Gary W. Floyd, Lumiea Systems Research Division (ThunderStruck Service, LLC), &ldquo;GEP-Based Security&rdquo; (2025).
-  </p>
+<div class="grid two">
+<div class="panel">
+  <h3>3 · The agent outside its envelope</h3>
+  <p class="note">The agent may act only inside an envelope the owner signed: which verbs, how much it may spend (the wallet kernel keeps the count), when, until when. Money, deals, public claims and any switch the owner reserves can never be in a standing envelope &mdash; each needs his live approval of those exact words. Two Ed25519 keys are made in this tab.</p>
+  <div class="row">
+    <label>The action<select id="fault">
+      <option value="valid">inside the envelope</option>
+      <option value="scope">a verb it was not given</option>
+      <option value="budget">over its budget</option>
+      <option value="window">before its window opens</option>
+      <option value="expiry">after it expires</option>
+      <option value="revoked">the owner revoked it</option>
+      <option value="high">send money, no live approval</option>
+      <option value="forged">an envelope signed by another key</option>
+      <option value="tampered">an envelope changed after signing</option>
+      <option value="words">a deal whose approved words changed</option>
+      <option value="approved">a deal with the owner&rsquo;s live approval</option>
+    </select></label>
+    <button id="envgo" type="button">Check it</button>
+  </div>
+  <div class="out" id="envout">—</div>
+</div>
+<div class="panel">
+  <h3>4 · Lock yourself out, then recover</h3>
+  <p class="note">BES must never lock its owner out. A block can be lifted by a record signed with the <b>offline recovery key</b> &mdash; a second key kept off the machine. The daily key can&rsquo;t do it, so neither can a thief who took it.</p>
+  <div class="btns">
+    <button id="lock" type="button">Put the owner&rsquo;s key on hold (ISOLATE)</button>
+    <button id="rec-ok" type="button">Recover with the offline key</button>
+    <button id="rec-daily" type="button">Try the daily key</button>
+    <button id="rec-replay" type="button">Replay the used record</button>
+    <button id="rec-tamper" type="button">Tamper with a record</button>
+  </div>
+  <div class="out" id="recout">—</div>
+</div>
+</div>
 
-<script type="module">
-import { signature, judge, fold, emptyBaseline, divergence, DEFAULTS } from './src/bes.mjs';
-import { windows } from './src/stream.mjs';
-const $=id=>document.getElementById(id);
-// a tiny seeded RNG so the demo is deterministic per press
-let seed=Date.now()>>>0; const rnd=()=>{ seed=(seed*1664525+1013904223)>>>0; return seed/4294967296; };
-const OPS=['build','gate','commit','memory','model'], WEIGHTS=[30,25,15,15,15];
-const pickOp=()=>{ let x=Math.floor(rnd()*100),i=0; while(x>=WEIGHTS[i]&&i<WEIGHTS.length-1){x-=WEIGHTS[i];i++;} return OPS[i]; };
-const operator=(n)=>{ let at=0; return Array.from({length:n},()=>{ at+=60+Math.floor(rnd()*240); return {type:pickOp(),at,size:1}; }); };
-const scripted=(n)=>{ let at=0; return Array.from({length:n},()=>{ at+=100; return {type:pickOp(),at,size:1}; }); };
-const hijack=(n)=>{ const H=['exfil','escalate','scan']; let at=0; return Array.from({length:n},()=>{ at+=60+Math.floor(rnd()*240); return {type:H[Math.floor(rnd()*3)],at,size:1}; }); };
-const W=DEFAULTS.window;
-let baseline=emptyBaseline();
+<div class="panel">
+  <h3>5 · One packet through all four layers</h3>
+  <p class="note">A real LIGHT packet, signed in this tab, through the same door the estate&rsquo;s nodes use. Layers 1 and 2 are checked on raw bytes before a byte of the body is decoded; BES judges the decoded action on the receiver&rsquo;s clock; every refusal becomes immune memory, and a source refused too often owes proof-of-work before it is looked at again.</p>
+  <div class="btns">
+    <button id="p-good" type="button">The owner, genuine</button>
+    <button id="p-forged" type="button">A forged signature</button>
+    <button id="p-foreign" type="button">Not LIGHT at all</button>
+    <button id="p-replay" type="button">A replayed packet</button>
+    <button id="p-thief" type="button">The real key, a script driving it</button>
+  </div>
+  <div class="scroll"><table class="tbl" id="pkttbl"><thead><tr><th>packet</th><th>admitted</th><th>layer that decided</th><th>why</th><th>immune memory</th><th>tarpit owed</th></tr></thead><tbody></tbody></table></div>
+</div>
+</section>
 
-function renderBaseline(){
-  $('count').textContent=baseline.count; $('rhythm').textContent=baseline.count?baseline.variability+'‰':'—';
-  const mix=baseline.mix||{}; const max=Math.max(1,...Object.values(mix));
-  $('mix').innerHTML=Object.keys(mix).length?Object.entries(mix).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="bar"><span class="n">${k}</span><span class="t"><span class="f" style="width:${Math.round(v/max*100)}%"></span></span><span class="n" style="text-align:right">${v}‰</span></div>`).join(''):'<div class="ev">learning…</div>';
-}
-function log(html){ const f=$('feed'); f.innerHTML='<div class="ev">'+html+'</div>'+f.innerHTML; }
-function present(label, events){
-  const sig=signature(events); const v=judge(sig, baseline, {});
-  const cls=v.level==='ALLOW'?'ok':v.level==='CALIBRATING'?'wn':'no';
-  log(`<span class="${cls}">${v.level}</span> ${label} — ${v.reason}`);
-  $('last').textContent=`${v.level} · drift ${v.divergence}‰ · rhythm ${v.variability}‰`;
-  if(v.ok && v.level==='ALLOW'){ baseline=fold(baseline, sig); renderBaseline(); }   // only an ALLOWED window folds in
-}
-function learn(){ baseline=emptyBaseline(); for(const win of windows(operator(W*12), W)){ const s=signature(win); if(judge(s,baseline,{}).ok) baseline=fold(baseline,s); } renderBaseline(); log('<span class="wn">baseline re-learned from the operator\'s own windows</span>'); }
+<section id="how">
+<h2>How it works</h2>
+<svg class="dia" viewBox="0 0 1000 250" role="img" aria-label="The four layers: verify-before-parse, the LIGHT barrier, BES, immune system and tarpit">
+  <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z"/></marker></defs>
+  <rect class="box" x="10" y="40" width="210" height="150" rx="12"/><text x="24" y="70">1 · verify-before-parse</text><text class="dim" x="24" y="94">pinned sender</text><text class="dim" x="24" y="114">signature verifies</text><text class="dim" x="24" y="134">counter is fresh</text><text class="dim" x="24" y="166">stops: forgeries, replays</text>
+  <rect class="box" x="255" y="40" width="210" height="150" rx="12"/><text x="269" y="70">2 · the LIGHT barrier</text><text class="dim" x="269" y="94">LIGHT magic, version</text><text class="dim" x="269" y="114">length, dictionary</text><text class="dim" x="269" y="134">only then: decode</text><text class="dim" x="269" y="166">stops: foreign bytes</text>
+  <rect class="box hot" x="500" y="40" width="230" height="150" rx="12"/><text x="514" y="70">3 · BES (this layer)</text><text class="dim" x="514" y="94">behaving like itself?</text><text class="dim" x="514" y="114">its own baseline, its own bars</text><text class="dim" x="514" y="134">agent: inside its envelope?</text><text class="dim" x="514" y="166">stops: a valid key, wrong hands</text>
+  <rect class="box" x="765" y="40" width="225" height="150" rx="12"/><text x="779" y="70">4 · immune + tarpit</text><text class="dim" x="779" y="94">every refusal → memory</text><text class="dim" x="779" y="114">BES block → an antibody</text><text class="dim" x="779" y="134">repeat sources pay work</text><text class="dim" x="779" y="166">nothing is sent back</text>
+  <path class="arrow" d="M222 115H252"/><path class="arrow" d="M467 115H497"/><path class="arrow" d="M732 115H762"/>
+  <text class="dim" x="10" y="225">An action proceeds only if every layer agrees. Layers 1 and 2 are one door in code (LIGHT&rsquo;s packet.open); BES sees the decoded action and the receiver&rsquo;s clock.</text>
+</svg>
 
-$('op').onclick=()=>present('the operator, another day', operator(W));
-$('scripted').onclick=()=>present('a scripted bot', scripted(W));
-$('hijack').onclick=()=>present('a hijacked run', hijack(W));
-$('relearn').onclick=learn;
+<h3>Inside BES, on every action</h3>
+<svg class="dia" viewBox="0 0 1000 330" role="img" aria-label="Inside BES: three entropy domains to S, field E, salience A, gradient and shift, the verdict ladder, the identity rules, enforcement">
+  <rect class="box" x="10" y="20" width="230" height="130" rx="12"/><text x="24" y="46">the window (last W actions)</text><text class="dim" x="24" y="70">H_net: gaps · bursts · source</text><text class="dim" x="24" y="90">H_beh: kind · step · place · size</text><text class="dim" x="24" y="110">  · hour · weekday · session</text><text class="dim" x="24" y="130">H_auth: tier · shift · privilege</text>
+  <rect class="box" x="275" y="20" width="230" height="130" rx="12"/><text x="289" y="46">against its own baseline</text><text class="dim" x="289" y="70" id="t-S">S = ⅓H_net + ⅓H_beh + ⅓H_auth</text><text class="dim" x="289" y="90" id="t-E">E(t) = σ(k(|S − S_b| − ε))</text><text class="dim" x="289" y="110" id="t-A">A(t) = exp(−D_KL(O‖B) − kΔS)</text><text class="dim" x="289" y="130" id="t-R">rhythm of the last 6 gaps</text>
+  <rect class="box hot" x="540" y="20" width="220" height="130" rx="12"/><text x="554" y="46">Gary&rsquo;s ladder (θ = ⅓)</text><text class="dim" x="554" y="70">E &gt; 2.5θ → BLOCK (ISOLATE)</text><text class="dim" x="554" y="90">E &gt; 2θ → STEP_UP · E &gt; 1.5θ → THROTTLE</text><text class="dim" x="554" y="110">A &lt; min → BLOCK · β|∇S| &gt; 1 → STEP_UP</text><text class="dim" x="554" y="130">too regular → BLOCK</text>
+  <rect class="box" x="795" y="20" width="195" height="130" rx="12"/><text x="809" y="46">the identity rules</text><text class="dim" x="809" y="70">owner: key ∧ his baseline</text><text class="dim" x="809" y="90">agent: key ∧ its baseline</text><text class="dim" x="809" y="110">  ∧ inside the envelope</text><text class="dim" x="809" y="130">mixed → step-up / block</text>
+  <path class="arrow" d="M242 85H272"/><path class="arrow" d="M507 85H537"/><path class="arrow" d="M762 85H792"/>
+  <rect class="box" x="10" y="185" width="980" height="120" rx="12"/><text x="24" y="211">enforcement (the owner&rsquo;s safety rules)</text>
+  <text class="dim" x="24" y="235">forming (first 14 days): observe only — nothing is enforced, every strong verdict is still raised as an alert</text>
+  <text class="dim" x="24" y="255">tiers switch on one at a time: THROTTLE → STEP_UP → BLOCK → ISOLATE; a verdict above the tiers that are on is enforced as the highest one on</text>
+  <text class="dim" x="24" y="275">a flagged genuine action waits in quarantine; the owner&rsquo;s answer teaches the baseline. A big shift is held for him to confirm.</text>
+  <text class="dim" x="24" y="295">an envelope or credential refusal is authorisation, not behaviour: BLOCK at once, in every mode</text>
+</svg>
+<div class="panel" id="trace"><h3>Your last run, traced</h3><p class="note">Hand a key to a script above and this fills with the exact numbers each action was judged on.</p></div>
+</section>
 
-(function boot(){ try{ learn(); $('kstat').textContent='kernel live'; $('kstat').className='pill live'; }catch(e){ $('kstat').textContent='kernel error'; $('kstat').style.color='var(--bad)'; } })();
-</script>
+<section id="results">
+<h2>Results &mdash; sealed before the code, failures shown</h2>
+<p>Every claim below was committed to git <b>before</b> any code that measures it existed (<a id="seal-link" href="https://github.com/sjgant80-hub/bes-inward/blob/65a6364/measure/claims.json">the seal, 65a6364</a>). The numbers the watch uses were picked on earlier data only, then frozen (<a id="seal2-link" href="https://github.com/sjgant80-hub/bes-inward/blob/main/params.json">params.json</a>), then the claims were measured on the most recent three weeks, which nothing had read. <b>Real</b> = this estate&rsquo;s own behaviour: the owner&rsquo;s turns and his agent&rsquo;s actions, kept on the device &mdash; only counts and rates are published. <b>Synthetic</b> = the seeded mirror CI re-runs byte for byte.</p>
+<div class="scroll"><table class="tbl" id="restbl"><thead><tr><th>claim</th><th>what it says</th><th>real</th><th>synthetic</th></tr></thead><tbody><tr><td colspan="4" class="note">loading receipts…</td></tr></tbody></table></div>
+<div class="panel" id="realdetail"><h3>What the real measurement saw</h3><p class="note">loading…</p></div>
+</section>
+
+<section id="blueprint">
+<h2>Blueprint &mdash; organ by organ</h2>
+<p>Every decision kernel is pure (no clock, no network, no files), total (junk in is a refusal or a step-up, never a crash) and mutation-gated: each operator is flipped and the tests must fail. Counts are read from the witness receipt.</p>
+<div class="scroll"><table class="tbl" id="bptbl"><thead><tr><th>organ</th><th>what it does</th><th>witness</th></tr></thead><tbody></tbody></table></div>
+<p class="note">Vendored byte-identical and pinned (re-checked in CI): LIGHT&rsquo;s packet door, codec and SHA-256, the wallet kernel and the Ed25519 identity from <a href="https://github.com/sjgant80-hub/fall-kit">fall-kit</a> core; the immune system and the rebound tarpit from <a href="https://github.com/sjgant80-hub/break-it">break-it</a>.</p>
+</section>
+
+<section id="adoption">
+<h2>Adoption &mdash; what it does for your business</h2>
+<div class="cards">
+  <div class="card"><h4>Who it is for</h4><p>Systems with one owner and high-value keys: founder-run platforms, AI research machines, an operations controller, a studio running its own AI agents on its own keys. One person plus one agent is what it is measured for.</p></div>
+  <div class="card"><h4>What changes on day one</h4><p>Nothing visible. It watches for 14 days and enforces nothing. Then the first tier switches on: odd-looking actions are admitted but flagged.</p></div>
+  <div class="card"><h4>What changes for people</h4><p>If an action is unusual, you are asked to confirm it once. Your answer teaches it. It never reads what you wrote &mdash; it keeps the shape of actions: when, what kind, which project, how big.</p></div>
+  <div class="card"><h4>What changes for your agents</h4><p>An agent acts only inside an envelope you signed, with a budget the wallet counts. Money, deals and public claims are never standing permissions: each needs your live yes to those exact words.</p></div>
+</div>
+<h3>Roll-out, step by step</h3>
+<ol class="steps">
+  <li><b>Install</b> beside the node that receives your signed actions. Pin your daily key, your agent&rsquo;s key, and your offline recovery key (keep that one off the machine).</li>
+  <li><b>Sign the agent&rsquo;s envelope</b>: its verbs, its budget, its hours, its expiry.</li>
+  <li><b>Observe for 14 days.</b> Every verdict is recorded and nothing is enforced.</li>
+  <li><b>Switch on THROTTLE</b>, then <b>STEP_UP</b>, then <b>BLOCK</b>, then <b>ISOLATE</b> &mdash; each only after the one before it has run clean.</li>
+  <li><b>Keep the recovery key offline.</b> It is the way back from any block, and it is never used for daily work.</li>
+</ol>
+</section>
+
+<section id="brochure">
+<h2>The brochure</h2>
+<p class="lede"><b>In one breath:</b> a valid key stops being enough &mdash; every action must also look like its holder, and your AI agent can act only inside the limits you signed, so a stolen password or token buys a thief a step-up prompt, not your business.</p>
+
+<h3 id="roles">For each role</h3>
+<div class="cards">
+  <div class="card"><h4>CEO</h4><p>A copied password or a leaked agent token no longer equals a breach. Your AI agent works inside limits you signed, and the big decisions &mdash; money, deals, public claims &mdash; still come to you, every time.</p></div>
+  <div class="card"><h4>CFO</h4><p>No licence fee (MIT). It runs on the machine you already have; its electricity rounds to nothing. The case below is computed from your numbers and published prices.</p></div>
+  <div class="card"><h4>COO</h4><p>Nothing is blocked while it learns. Tiers switch on one at a time. Every strong verdict is raised with its reason, never silently. The offline key always brings you back.</p></div>
+  <div class="card"><h4>CTO / CISO</h4><p>Four layers, verify-before-parse first. Behaviour judged on the receiver&rsquo;s clock in three entropy domains, per identity, with bars each identity learns from itself. Envelopes on Ed25519 and the wallet kernel. Mutation-gated kernels; sealed measurements with their failures published.</p></div>
+  <div class="card"><h4>Your team</h4><p>If it really is you, one confirmation and you carry on &mdash; and it learns from your answer. It keeps the shape of what you do, never the words.</p></div>
+</div>
+
+<h3 id="cost">The cost case &mdash; your numbers</h3>
+<div class="panel">
+  <div class="row">
+    <label>People holding keys<input id="c-people" type="number" min="0" step="1" value="10"></label>
+    <label>AI agents on their own keys<input id="c-agents" type="number" min="0" step="1" value="2"></label>
+    <label>Actions a day, all keys<input id="c-actions" type="number" min="0" step="100" value="20000"></label>
+    <label>Minutes per step-up answered<input id="c-min" type="number" min="0" step="0.5" value="1"></label>
+  </div>
+  <div class="grid three" style="margin-top:12px">
+    <div><div class="note">renting identity protection per seat, a year</div><div class="money" id="c-rented">—</div></div>
+    <div><div class="note">the BES layer, a year (licence £0)</div><div class="money" id="c-bes">—</div></div>
+    <div><div class="note">the difference</div><div class="money" id="c-save">—</div></div>
+  </div>
+  <p class="note" id="c-lines"></p>
+</div>
+
+<h3 id="compare">Against what you pay now</h3>
+<p>The usual answer to stolen credentials is a rented, per-seat cloud identity service &mdash; for example Microsoft Entra ID P2, which includes ID Protection and risk-based Conditional Access, at <b>US$10.00 per user per month, paid yearly</b> (its own published price, read 28 October 2026). It sends your sign-in signals to the vendor&rsquo;s cloud and judges sign-ins. The BES layer judges <b>every action</b>, on <b>your</b> machine, for your people <b>and your AI agents</b>, and its behavioural data never leaves the device. You can run both; BES needs no vendor account to work.</p>
+<p class="note">Why it matters now: stolen passwords were the top way attackers got in until Verizon&rsquo;s 2026 report, where software vulnerabilities (31%) moved ahead of them; the average breach cost US$4.99 million in IBM&rsquo;s Cost of a Data Breach Report 2026, a record.</p>
+
+<h3 id="security">Security, data protection, compliance</h3>
+<ul>
+  <li><b>Where the data lives:</b> behavioural baselines are kept in LIGHT on the device they protect. They are not uploaded, not synced, not in any repository. This public page and its CI run on synthetic behaviour only; the real measurement publishes counts and rates and the SHA-256 of each private input, nothing else.</li>
+  <li><b>UK GDPR:</b> behaviour about a person is personal data. BES processes it on that person&rsquo;s own device, for the security of their own system (Article 32, security of processing) &mdash; no processor, no transfer, nothing to a third country. If you use it to watch staff, tell them first, as the ICO&rsquo;s guidance on monitoring workers expects.</li>
+  <li><b>What it keeps:</b> the shape of actions &mdash; time, kind, project, size, permission tier. Never the text of a message or a command.</li>
+  <li><b>Audit:</b> every verdict carries the row of the decision table that produced it and the part it was measured on.</li>
+</ul>
+
+<h3 id="support">Ownership and support</h3>
+<p>MIT-licensed: you own and run it, and it keeps running without us. Supplier: <a href="https://www.ai-nativesolutions.com">AI Native Solutions</a>. Support and service terms are agreed per deployment, in each deployment&rsquo;s agreement.</p>
+
+<h3 id="risks">Risks, answered straight</h3>
+<div class="scroll"><table class="tbl"><tbody>
+  <tr><th>It will ask you to confirm real actions sometimes.</th><td>Yes &mdash; the measured rate on the owner&rsquo;s real behaviour is in <a href="#results">Results</a>, with the number of distinct times he would have been asked. Each answer teaches it.</td></tr>
+  <tr><th>A perfect copy of your own past behaviour.</th><td>A thief who replays your exact past week, rhythm and all, is the hardest case &mdash; Gary W. Floyd&rsquo;s own paper says behaviour alone does not stop mimicry. We sealed that as a predicted limit (L1) and measured it; the result is in Results.</td></tr>
+  <tr><th>The first two weeks.</th><td>While it learns it enforces nothing. The other layers (signatures, counters, the LIGHT barrier) still refuse forgeries from the first second.</td></tr>
+  <tr><th>Someone at your actual keyboard.</th><td>Physical compromise of the device is out of scope. So is replacing encryption, patching or verify-before-parse &mdash; BES complements them.</td></tr>
+  <tr><th>Many people, many agents.</th><td>It is measured for one owner and one agent. More identities each get their own watch; arbitration between many is Gary&rsquo;s listed future work, not this build&rsquo;s claim.</td></tr>
+</tbody></table></div>
+
+<h3 id="board">The case for the board</h3>
+<div class="rule"><p><b>Problem:</b> every security layer we had trusts a valid key; stolen credentials were the leading way in until this year, and a breach averages US$4.99 million. <b>Answer:</b> a fourth layer that makes a valid key insufficient on its own &mdash; behaviour must match, and the AI agent is bound to signed limits with the big decisions reserved to the owner. <b>Evidence:</b> measured on our own real behaviour against claims sealed before the code, failures published; kernels mutation-gated; the synthetic mirror re-run in CI on every push. <b>Cost:</b> no licence, our own hardware, electricity that rounds to nothing. <b>Risk:</b> a measured rate of confirmation prompts, a two-week learning period, and the mimicry limit &mdash; all on this page.</p></div>
+</section>
+
+<section id="paper">
+<h2>White paper</h2>
+<details open><summary>1 · The gap</summary><p>The estate&rsquo;s first layers prove a request is genuine: its sender&rsquo;s key is pinned, its signature verifies, its counter is fresh, its bytes are LIGHT. Every one of those specs put key compromise out of scope. An attacker holding a valid key passes all of them. BES closes that gap with a different question: not &ldquo;who are you?&rdquo; but &ldquo;are you behaving like yourself?&rdquo;</p></details>
+<details><summary>2 · Gary W. Floyd&rsquo;s method</summary>
+<p>From &ldquo;GEP-Based Security: Behavioral Entropy Signatures for Cybersecurity and DevOps&rdquo; (2025): every action is evaluated across three entropy domains &mdash; network (H_net), behavioural (H_beh) and authorisation (H_auth) &mdash; combined into one state in nats, and a decision function built on the Guided Entropy Principle:</p>
+<div class="eq">S = w_n·H_net + w_b·H_beh + w_a·H_auth</div>
+<div class="eq">E(t) = σ(k(|S_current − S_baseline| − ε))   ·   A(t) = action salience   ·   β|∇S(t)| = damping   ·   ΔS = expected shift</div>
+<p>Verdicts ALLOW · THROTTLE · STEP-UP · BLOCK · ISOLATE. &ldquo;Credential validity does not override entropy violation.&rdquo; Baselines are built online, with no training corpus, over about two weeks. His key finding: attackers fail by being overly regular (scripted) or randomly variant.</p>
+<p>From &ldquo;Bayesian Entropy Similarity (BES): Alignment Salience for Entropy-Regulated AI Systems&rdquo; (Technical Report, December 2025): A_t = exp(−D_KL(O‖B) − k·ΔS), and the decision matrix &mdash; E above threshold×2.5 → BLOCK, ×2.0 → STEP_UP, ×1.5 → THROTTLE; within bounds, A below its minimum → BLOCK, otherwise ALLOW. &ldquo;Alignment does not override entropy.&rdquo; And: &ldquo;Agent alignment ≠ operator alignment. Track both separately.&rdquo;</p></details>
+<details><summary>3 · Where the papers are silent, and what this build chose</summary>
+<ul>
+  <li><b>The symbols.</b> IP addresses, geography, ports and MFA devices are not observable on one local machine; the nearest local signals stand in (client surface, gaps, bursts; kind, step, project, size, hour, weekday, session time; permission tier, its transitions, privilege elevation and time since).</li>
+  <li><b>θ = ⅓</b>, so &ldquo;within bounds&rdquo; (E ≤ 1.5θ = ½) is exactly |S − S_b| ≤ ε, and the top rung stays reachable.</li>
+  <li><b>A(t) is clamped at 1.</b> The paper&rsquo;s simplified formula exceeds 1 when ΔS &lt; 0, against its own Property 3.1; clamping keeps Properties 3.1&ndash;3.3 as stated.</li>
+  <li><b>ΔS</b> per action is the change it makes to |S − S_b|; the session&rsquo;s ΔS is its running sum (Gary&rsquo;s own &ldquo;delta_s_session&rdquo;).</li>
+  <li><b>The two tables are combined:</b> the alignment matrix gives the rung; the security table adds rapid escalation (β|∇S| &gt; 1 → STEP_UP) and critical anomaly (→ ISOLATE).</li>
+  <li><b>Four parts:</b> the unified S and each of the three domains are judged against their own learned bars, worst wins &mdash; a script that only changes its timing collapses H_net while S barely moves.</li>
+  <li><b>Overly regular gets its own row:</b> the rhythm of the last six positive gaps (mean absolute deviation over the mean, the estate&rsquo;s v1 measure) below the identity&rsquo;s own learned floor → BLOCK. An identity that is itself clockwork learns a floor of 0.</li>
+  <li><b>Bars are learned per identity</b> from its own formation and adapt with damping: ε and k from its own deviations, the alignment bar from its own D_KL + kΔS, β from its own |∇S|.</li>
+  <li><b>EMA α = 0.2</b> (the paper&rsquo;s typical value), applied once per completed block of accepted actions.</li>
+  <li><b>Quarantine:</b> a flagged genuine action is learned only when its owner answers; nothing nobody vouches for is ever learned. A block that moves the baseline too far is held for the owner to confirm (the paper&rsquo;s proposed stability bound).</li>
+</ul></details>
+<details><summary>4 · The three-part identity (the estate&rsquo;s extension)</summary><p>The owner&rsquo;s human baseline learns the structure of his irregularity and never rejects it. The agent has its own baseline &mdash; never a copy of his &mdash; where machine regularity is expected but must be the agent&rsquo;s own regularity. And a signed delegation envelope: the agent outside it is blocked regardless of its baseline; money, deals, public claims and reserved switches are never in a standing envelope. Owner action = credential ∧ his baseline. Agent action = credential ∧ its baseline ∧ inside the envelope. An agent inside its envelope but not behaving like itself is stepped up to the owner.</p></details>
+<details><summary>5 · Safety rules</summary><p>No self-lockout: observe-only while forming, and an offline recovery key always lifts a block. Fail toward step-up, never a silent block. Baseline drift adapts with damping; big shifts are confirmed by the owner. Behavioural baselines stay on the device, in LIGHT.</p></details>
+<details><summary>6 · How it was measured</summary><p>Claims B1&ndash;B7 and the predicted limit L1 were sealed first. Real streams: the owner&rsquo;s human turns, the agent&rsquo;s tool calls, the agent&rsquo;s nightly loop. Formation = each stream&rsquo;s first 14 days; tuning read only the period before 7 October 2026; the claims were measured on 7&ndash;28 October. The &ldquo;stolen key&rdquo; fixtures only re-time or re-order the identity&rsquo;s own recorded requests &mdash; a fixed pace, machine speed, random moments, the wrong step order, the other identity&rsquo;s timing, and a perfect copy of last week &mdash; injected at 20 moments, each judged on its first ten actions.</p></details>
+<details><summary>7 · Limits</summary><p>One owner and one agent. Mimicry of one&rsquo;s own exact past is the method&rsquo;s known limit. The real numbers are this estate&rsquo;s, from one machine; Gary&rsquo;s production results (zero intrusions and under 0.1% false positives over 18 months) are his, not repeated here. No defence against physical compromise.</p></details>
+</section>
+
+<section id="faq">
+<h2>FAQ</h2>
+<details><summary>Does it read my messages?</summary><p>No. It keeps the shape of each action &mdash; when, what kind, which project, how large, which permission tier &mdash; computed on the device. The text is never stored.</p></details>
+<details><summary>What if I change how I work?</summary><p>Small changes are learned as you go. A big change is held and you confirm it once. If it ever blocks you, the offline recovery key lifts it.</p></details>
+<details><summary>Isn&rsquo;t my AI agent supposed to be regular?</summary><p>Yes &mdash; so it is measured against its own regularity, not the owner&rsquo;s. A script driving its key shows the wrong regularity: a fixed pace, the wrong order, the wrong hours.</p></details>
+<details><summary>Can the agent spend money or sign a deal on its own?</summary><p>No. Those are never in a standing envelope; each needs the owner&rsquo;s live approval of the exact words, and changing one character voids it.</p></details>
+<details><summary>Do I need a cloud account?</summary><p>No. It runs on the machine it protects.</p></details>
+</section>
+
+<footer>
+  <p><b>Credits.</b> Behavioral Entropy Signatures, the three domains, the GEP security decision function and its verdicts: <b>Gary W. Floyd, Lumiea Systems Research Division — ThunderStruck Service LLC — &ldquo;GEP-Based Security: Behavioral Entropy Signatures for Cybersecurity and DevOps,&rdquo; 2025</b> (released as open defensive prior art under CC BY 4.0). Alignment salience A(t) and the decision matrix: <b>Gary W. Floyd, Lumiea Systems Research Division — ThunderStruck Service LLC — &ldquo;Bayesian Entropy Similarity (BES): Alignment Salience for Entropy-Regulated AI Systems,&rdquo; Technical Report, December 2025</b> (MIT License, released as defensive prior art). The equations and the key finding are his; this layer, its choices where the papers are silent, its kernels and its measurements are the estate&rsquo;s.</p>
+  <p>Powered by the Konomi architecture, created by Thomas Frumkin. · Supplier: <a href="https://www.ai-nativesolutions.com">AI Native Solutions</a> · MIT, no licence fee · <a href="https://github.com/sjgant80-hub/bes-inward">source</a></p>
+</footer>
+</div>
+<script type="module" src="page/app.mjs"></script>
 </body>
 </html>

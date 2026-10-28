@@ -1,13 +1,29 @@
-BES INWARD — credits and provenance
+BES — the behaviour layer — credits and provenance
 
-Behavioral Entropy Signatures (BES) — "identity is insufficient; behaviour is authoritative" — are the
-work of GARY W. FLOYD, Lumiea Systems Research Division (subsidiary of ThunderStruck Service, LLC),
-New Caney, Texas, "GEP-Based Security: Behavioral Entropy Signatures for Cybersecurity and DevOps"
-(2025). The key finding reproduced here — that an impostor fails by being either overly regular
-(scripted) or randomly uncorrelated with the operator, and that a one-class rolling baseline needs no
-training corpus — is his.
+Behavioral Entropy Signatures (BES), the three entropy domains (network, behavioural, authorisation), the unified
+state S in nats, the GEP security decision function E(t) = σ(k(|S − S_baseline| − ε)) with A(t), β|∇S(t)| and ΔS, the
+verdicts ALLOW / THROTTLE / STEP-UP / BLOCK / ISOLATE, the rule "credential validity does not override entropy
+violation", the ~2-week online baseline and the key finding that attackers fail by being either overly regular or
+randomly variant are the work of:
 
-This build applies BES INWARD: the operator being watched is the running body itself, so a hijacked or
-prompt-injected run is caught by behaviour rather than credential. The kernel (bes.mjs), the streaming
-adapter and the proofs are original to this build and MIT licensed. The compression/codec lineage the
-estate builds on is Thomas Frumkin (Konomi).
+  Gary W. Floyd, Lumiea Systems Research Division — ThunderStruck Service LLC — "GEP-Based Security: Behavioral
+  Entropy Signatures for Cybersecurity and DevOps," 2025. Released as open defensive prior art under CC BY 4.0.
+
+The alignment salience A_t = exp(−D_KL(O‖B) − k·ΔS), its properties, the decision matrix (threshold × 2.5 / 2.0 / 1.5;
+A below its minimum → BLOCK), the EMA baseline update with α = 0.2, the stability-bound hardening and the instruction to
+track agent and operator alignment separately are the work of:
+
+  Gary W. Floyd, Lumiea Systems Research Division — ThunderStruck Service LLC — "Bayesian Entropy Similarity (BES):
+  Alignment Salience for Entropy-Regulated AI Systems," Technical Report, December 2025. MIT License, released as
+  defensive prior art.
+
+This build — the estate's BES layer, which draws on those papers — is original and MIT-licensed: the local symbols
+that stand in for what a single machine cannot observe, the per-identity parts and learned bars, the rhythm row, the
+quarantine and owner confirmation, the three-part identity with its delegation envelope, the enforcement tiers and
+observe-only formation, the offline recovery path, the four-layer stack, the drivers and the sealed measurements.
+Every choice made where the papers are silent is named in the kernel headers.
+
+Vendored byte-identical (see vendor/SOURCES.json): LIGHT's packet, codec and SHA-256, the wallet kernel and the
+Ed25519 identity from sjgant80-hub/fall-kit; the immune system and the rebound from sjgant80-hub/break-it.
+
+Powered by the Konomi architecture, created by Thomas Frumkin.

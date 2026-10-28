@@ -1,57 +1,58 @@
-# BES INWARD
+# BES — the behaviour layer
 
 ### ▶ Live: **https://sjgant80-hub.github.io/bes-inward/**
 
-A system that watches **its own operator**. The question isn't *"who are you?"* — it's **"are you behaving
-like yourself?"** It learns the operator's behavioural signature, then catches a hijacked or scripted run
-by **how it behaves**, with no credential changing hands.
+**A stolen key still works. Its thief's behaviour doesn't.** The BES layer checks every action that arrives with a
+valid signature against how the holder of that key really behaves. It learns the owner's own behaviour and his AI
+agent's own behaviour — each from itself, on the device — and steps up or blocks a valid key in the wrong hands.
+For the agent, a third part: it may act only inside a **delegation envelope** the owner signed, and money, deals,
+public claims and reserved switches are never in a standing envelope.
 
-> **Identity is insufficient; behaviour is authoritative.** — the heart of Gary W. Floyd's Behavioral
-> Entropy Signatures (BES). This build turns it **inward**: the operator being watched is the running body
-> itself, so a prompt-injected or hijacked run is caught by its behaviour, not by any token it carries.
+It is layer 3 of four: **verify-before-parse → the LIGHT barrier → BES → the immune system and tarpit.** An action
+proceeds only if every layer agrees. Credential validity never overrides a behaviour violation.
 
-## How it works
+The live page runs the real kernels in your tab on **synthetic** behaviour only, explains itself (start here, how it
+works traced from your run, the blueprint, adoption, the brochure, the white paper) and reads every result from the
+committed receipts.
 
-A window of actions has a **signature**: the *mix* of what was done (op distribution, in permille) and the
-*rhythm* of how it was done (how variable the gaps between actions are). Gary's finding, kept exactly — an
-impostor fails one of two ways:
+## The method — credited
 
-- **too regular** → scripted automation runs like clockwork (near-zero rhythm variability), or
-- **randomly uncorrelated** → a hijack does a different mix of actions (far from the operator's baseline).
+- **Gary W. Floyd, Lumiea Systems Research Division — ThunderStruck Service LLC — "GEP-Based Security: Behavioral
+  Entropy Signatures for Cybersecurity and DevOps," 2025** (open defensive prior art, CC BY 4.0): the three entropy
+  domains H_net · H_beh · H_auth, S in nats, E(t) = σ(k(|S − S_b| − ε)), A(t), β|∇S|, ΔS, the five verdicts, and the
+  key finding — attackers fail by being overly regular or randomly variant.
+- **Gary W. Floyd, Lumiea Systems Research Division — ThunderStruck Service LLC — "Bayesian Entropy Similarity (BES):
+  Alignment Salience for Entropy-Regulated AI Systems," Technical Report, December 2025** (MIT, defensive prior art):
+  A_t = exp(−D_KL(O‖B) − k·ΔS) and the decision matrix; "agent alignment ≠ operator alignment — track both separately."
 
-So the gate is two-sided: too regular → flag; too far from the baseline → flag; otherwise allow. It's
-**one-class** — it models the operator, never the attacker — so a hijack it has never seen still flags. And
-the baseline is the **+1**, the still centre: it only folds in windows it already *allowed*, so an impostor
-cannot drift it toward itself (negative selection). Integer-only and deterministic.
+Every place the papers are silent, and what this build chose there, is listed in the kernel headers and on the page
+(white paper §3). The layer, its choices, its kernels and its measurements are the estate's.
+Powered by the Konomi architecture, created by Thomas Frumkin.
 
-## Run it
+## What is proven, and how to re-run it
 
-```bash
-node run.mjs    # learn the operator's baseline, then watch his own behaviour pass and an impostor flag
-```
+| proof | command | what it checks |
+|---|---|---|
+| sealed claims | [`measure/claims.json`](measure/claims.json) @ `65a6364` | B1–B7 + the predicted limit L1, committed before any measuring code |
+| frozen numbers | [`params.json`](params.json) | chosen by `tools/tune.mjs` on data before 7 Oct 2026 only (rule in the seal) |
+| real measurement | `node measure/measure.mjs --real` (local) | the owner's and agent's real behaviour 7–28 Oct → [`receipts/real.json`](receipts/real.json): counts and rates only, plus each private input's SHA-256 |
+| synthetic mirror | `node measure/measure.mjs --synthetic --check` (CI) | the same claims on seeded synthetic streams, reproduced byte for byte |
+| mutation gate | `node witness-all.mjs` (CI, one job per kernel) | every operator flipped; no unreviewed survivor; nothing capped |
+| vendored kernels | `node tools/vendor.mjs --check` (CI) | LIGHT, the wallet and identity (fall-kit), immune + rebound (break-it) byte-identical to their pins |
+| suites | `node --test test/*.test.mjs` | unit + a hostile-input battery: no kernel throws on junk |
 
-In the estate it watches Kar's own nightly action ledger (`actionsFromLedger`) — the running body watching
-itself.
+Failures are kept: a claim that failed stays failed in the receipt and on the page.
 
-## Proof it holds (all re-runnable; CI runs them)
+## Privacy
 
-- **`node attack-kit/redteam.mjs --check`** — 6 cases, byte-identical receipt: the operator's own varied
-  behaviour passes (low false positive); a scripted run is flagged *too regular*; a hijack is flagged
-  *unlike the operator*; the baseline **cannot be poisoned** by impostor windows; it *calibrates* while
-  still learning; and a malformed signature **fails closed**.
-- **`node witness-all.mjs`** — mutation + fuzz gate over `bes.mjs`: **CLEAN, 46/49 killed**, 3
-  reviewed-equivalent (each with a written reason). The fuzz first caught three real total-ness gaps
-  (toxic-getter events) before the gate ran; fixed, then gated on a green baseline.
-- **`node --test test/*.test.mjs`** — unit + hostile-input (never-throw) suites.
+Real behavioural streams and baselines live only under `~/.si-didy/bes/private/` on the owner's machine, LIGHT-coded
+(`src/store.mjs`). `tools/extract.mjs` reads the text of the owner's turns only to compute a structural class and a
+word count, and never stores it. Nothing private is in this repository, its CI, or the page.
 
-## The fourth pillar
+## Layout
 
-Gary's BES paper names four security pillars. This completes the estate's set:
+`src/` kernels (entropy, gep, watch, trust, envelope, recovery, stack, store, drivers, cost, synth; v1 `bes.mjs`,
+`stream.mjs`) · `measure/` claims, harness, judge, measurement · `tools/` vendor, extract, tune (local) · `vendor/`
+pinned kernels · `page/` + `index.html` the live page · `receipts/`.
 
-- **[break-it](https://github.com/sjgant80-hub/break-it)** — authentication (is the message real)
-- **[perimeter-post](https://github.com/sjgant80-hub/perimeter-post)** — authorization (may this agent act)
-- **bes-inward** — **behaviour** (is it behaving like itself)
-- the hash-chained ledgers — audit (what happened)
-
-MIT licensed; see [`NOTICE`](NOTICE) for credits — BES is Gary W. Floyd (Lumiea / ThunderStruck); Konomi /
-Thomas Frumkin.
+MIT. Supplier: [AI Native Solutions](https://www.ai-nativesolutions.com). See [`NOTICE`](NOTICE).
