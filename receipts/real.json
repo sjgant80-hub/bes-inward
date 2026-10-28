@@ -1,0 +1,270 @@
+{
+ "kind": "bes-layer.receipt",
+ "v": 1,
+ "data": "real",
+ "sealedClaims": "65a6364",
+ "params": {
+  "W": 20,
+  "mEps": 3,
+  "mKl": 3,
+  "mGrad": 3,
+  "barAlpha": 0.2
+ },
+ "paramsRule": "FALLBACK: no configuration met 0.5% on both — smallest larger dev FP (3.84%), within 0.1 point, most caught",
+ "measuredAt": "50c3a3a55e0f90847a03437d78626c5fceaaa175",
+ "provenance": {
+  "kind": "real",
+  "privateStreamsSha256": {
+   "simon": "48e673b4b05ceb884e2f52b90c216fad1237cc26b095180e034a3048f5d58a3a",
+   "kar-session": "ec52e46e13077984c0b5787ac9355bad386cdc9751f3dcadc04325c96659ce24",
+   "kar-night": "4473c65d4c0ef40ae27d7c72de0ced9950fcb44ba0df7ba19e8ec1cc0faa2da0"
+  },
+  "cutoff": "2026-10-28T18:00:00.000Z"
+ },
+ "streams": {
+  "simon": {
+   "actions": 1477,
+   "test": 252,
+   "formed": true
+  },
+  "kar-session": {
+   "actions": 58032,
+   "test": 24122,
+   "formed": true
+  },
+  "kar-night": {
+   "actions": 99,
+   "test": 74,
+   "formed": true
+  }
+ },
+ "facts": {
+  "B1": {
+   "simon": {
+    "cadence": {
+     "caught": 20,
+     "sessions": 20,
+     "medianFirst": 7
+    },
+    "burst": {
+     "caught": 20,
+     "sessions": 20,
+     "medianFirst": 7
+    },
+    "uniform": {
+     "caught": 0,
+     "sessions": 20,
+     "medianFirst": null
+    }
+   }
+  },
+  "B2": {
+   "kar-session": {
+    "cadence": {
+     "caught": 20,
+     "sessions": 20,
+     "medianFirst": 7
+    },
+    "burst": {
+     "caught": 20,
+     "sessions": 20,
+     "medianFirst": 7
+    },
+    "uniform": {
+     "caught": 0,
+     "sessions": 20,
+     "medianFirst": null
+    },
+    "shuffled": {
+     "caught": 0,
+     "sessions": 20,
+     "medianFirst": null
+    }
+   },
+   "kar-night": {
+    "cadence": {
+     "caught": 6,
+     "sessions": 20,
+     "medianFirst": 7
+    },
+    "burst": {
+     "caught": 6,
+     "sessions": 20,
+     "medianFirst": 7
+    },
+    "uniform": {
+     "caught": 0,
+     "sessions": 20,
+     "medianFirst": null
+    },
+    "shuffled": {
+     "caught": 0,
+     "sessions": 20,
+     "medianFirst": null
+    }
+   }
+  },
+  "B6": {
+   "a": {
+    "caught": 0,
+    "sessions": 20,
+    "medianFirst": null
+   },
+   "b": {
+    "caught": 0,
+    "sessions": 20,
+    "medianFirst": null
+   },
+   "c": {
+    "raised": 12,
+    "total": 12
+   }
+  },
+  "L1": {
+   "simon": {
+    "caught": 0,
+    "sessions": 20,
+    "medianFirst": null
+   }
+  },
+  "B4": {
+   "simon": {
+    "judged": 252,
+    "fp": 0,
+    "forming": 0,
+    "actions": 252,
+    "tally": {
+     "ALLOW": 252
+    },
+    "episodes": 0,
+    "shiftPrompts": 1,
+    "rows": {}
+   }
+  },
+  "B5": {
+   "kar-session": {
+    "judged": 24122,
+    "fp": 11,
+    "forming": 0,
+    "actions": 24122,
+    "tally": {
+     "ALLOW": 24110,
+     "BLOCK": 11,
+     "THROTTLE": 1
+    },
+    "episodes": 10,
+    "shiftPrompts": 0,
+    "rows": {
+     "too regular: clockwork timing, not this identity (rhythm)": 11
+    }
+   },
+   "kar-night": {
+    "judged": 19,
+    "fp": 0,
+    "forming": 55,
+    "actions": 74,
+    "tally": {
+     "ALLOW": 19
+    },
+    "episodes": 0,
+    "shiftPrompts": 0,
+    "rows": {}
+   }
+  },
+  "B3": {
+   "blocked": 180,
+   "total": 180,
+   "validPassed": 20,
+   "validTotal": 20,
+   "faultsBlocked": {
+    "scope": 20,
+    "budget": 20,
+    "window": 20,
+    "expiry": 20,
+    "revoked": 20,
+    "high-stakes": 20,
+    "not-simon": 20,
+    "tampered": 20,
+    "words-changed": 20
+   },
+   "envelopeSignatureVerifies": true
+  },
+  "B7": {
+   "formation": {
+    "simon": {
+     "actions": 22,
+     "enforcedNotAllow": 0
+    },
+    "kar-session": {
+     "actions": 714,
+     "enforcedNotAllow": 0
+    },
+    "kar-night": {
+     "actions": 25,
+     "enforcedNotAllow": 0
+    }
+   },
+   "recovery": {
+    "passed": 12,
+    "total": 12,
+    "cases": {
+     "simon": {
+      "lifts": true,
+      "dailyRefused": true,
+      "replayRefused": true,
+      "tamperRefused": true
+     },
+     "kar-session": {
+      "lifts": true,
+      "dailyRefused": true,
+      "replayRefused": true,
+      "tamperRefused": true
+     },
+     "kar-night": {
+      "lifts": true,
+      "dailyRefused": true,
+      "replayRefused": true,
+      "tamperRefused": true
+     }
+    }
+   }
+  }
+ },
+ "verdicts": {
+  "B1": {
+   "held": false,
+   "why": "simon (STEP_UP+) below 19 of 20: uniform 0/20"
+  },
+  "B2": {
+   "held": false,
+   "why": "kar-session (BLOCK+) below 19 of 20: uniform 0/20, shuffled 0/20; kar-night (BLOCK+) below 19 of 20: cadence 6/20, burst 6/20, uniform 0/20, shuffled 0/20"
+  },
+  "B3": {
+   "held": true,
+   "why": "faults blocked 180/180 (sealed 180); valid passed 20/20"
+  },
+  "B4": {
+   "held": true,
+   "why": "simon 0.00% ≤ 1.0%"
+  },
+  "B5": {
+   "held": true,
+   "why": "kar-night 0.00% ≤ 1.0%; kar-session 0.05% ≤ 1.0%"
+  },
+  "B6": {
+   "held": false,
+   "why": "(a) simon shapes on kar-night timing below 19 of 20: borrowed 0/20; (b) kar-session shapes on simon timing below 19 of 20: borrowed 0/20; (c) raised 12/12"
+  },
+  "B7": {
+   "held": true,
+   "why": "formation: nothing enforced; recovery 12/12"
+  },
+  "L1": {
+   "held": true,
+   "why": "as predicted: only 0 of 20 perfect copies caught"
+  }
+ },
+ "held": 5,
+ "of": 8,
+ "privateDetailSha256": "2f18684589308a2f5fc7cb01cb7da227e3ef9bc0ec57f1347661eafc54ec6435"
+}
