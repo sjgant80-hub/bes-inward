@@ -124,7 +124,7 @@
 
 <section id="how">
 <h2>How it works</h2>
-<svg class="dia" viewBox="0 0 1000 250" role="img" aria-label="The four layers: verify-before-parse, the LIGHT barrier, BES, immune system and tarpit">
+<div class="scroll dia-wrap"><svg class="dia" viewBox="0 0 1000 250" role="img" aria-label="The four layers: verify-before-parse, the LIGHT barrier, BES, immune system and tarpit">
   <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z"/></marker></defs>
   <rect class="box" x="10" y="40" width="210" height="150" rx="12"/><text x="24" y="70">1 · verify-before-parse</text><text class="dim" x="24" y="94">pinned sender</text><text class="dim" x="24" y="114">signature verifies</text><text class="dim" x="24" y="134">counter is fresh</text><text class="dim" x="24" y="166">stops: forgeries, replays</text>
   <rect class="box" x="255" y="40" width="210" height="150" rx="12"/><text x="269" y="70">2 · the LIGHT barrier</text><text class="dim" x="269" y="94">LIGHT magic, version</text><text class="dim" x="269" y="114">length, dictionary</text><text class="dim" x="269" y="134">only then: decode</text><text class="dim" x="269" y="166">stops: foreign bytes</text>
@@ -132,10 +132,10 @@
   <rect class="box" x="765" y="40" width="225" height="150" rx="12"/><text x="779" y="70">4 · immune + tarpit</text><text class="dim" x="779" y="94">every refusal → memory</text><text class="dim" x="779" y="114">BES block → an antibody</text><text class="dim" x="779" y="134">repeat sources pay work</text><text class="dim" x="779" y="166">nothing is sent back</text>
   <path class="arrow" d="M222 115H252"/><path class="arrow" d="M467 115H497"/><path class="arrow" d="M732 115H762"/>
   <text class="dim" x="10" y="225">An action proceeds only if every layer agrees. Layers 1 and 2 are one door in code (LIGHT&rsquo;s packet.open); BES sees the decoded action and the receiver&rsquo;s clock.</text>
-</svg>
+</svg></div>
 
 <h3>Inside BES, on every action</h3>
-<svg class="dia" viewBox="0 0 1000 330" role="img" aria-label="Inside BES: three entropy domains to S, field E, salience A, gradient and shift, the verdict ladder, the identity rules, enforcement">
+<div class="scroll dia-wrap"><svg class="dia" viewBox="0 0 1000 330" role="img" aria-label="Inside BES: three entropy domains to S, field E, salience A, gradient and shift, the verdict ladder, the identity rules, enforcement">
   <rect class="box" x="10" y="20" width="230" height="130" rx="12"/><text x="24" y="46">the window (last W actions)</text><text class="dim" x="24" y="70">H_net: gaps · bursts · source</text><text class="dim" x="24" y="90">H_beh: kind · step · place · size</text><text class="dim" x="24" y="110">  · hour · weekday · session</text><text class="dim" x="24" y="130">H_auth: tier · shift · privilege</text>
   <rect class="box" x="275" y="20" width="230" height="130" rx="12"/><text x="289" y="46">against its own baseline</text><text class="dim" x="289" y="70" id="t-S">S = ⅓H_net + ⅓H_beh + ⅓H_auth</text><text class="dim" x="289" y="90" id="t-E">E(t) = σ(k(|S − S_b| − ε))</text><text class="dim" x="289" y="110" id="t-A">A(t) = exp(−D_KL(O‖B) − kΔS)</text><text class="dim" x="289" y="130" id="t-R">rhythm of the last 6 gaps</text>
   <rect class="box hot" x="540" y="20" width="220" height="130" rx="12"/><text x="554" y="46">Gary&rsquo;s ladder (θ = ⅓)</text><text class="dim" x="554" y="70">E &gt; 2.5θ → BLOCK (ISOLATE)</text><text class="dim" x="554" y="90">E &gt; 2θ → STEP_UP · E &gt; 1.5θ → THROTTLE</text><text class="dim" x="554" y="110">A &lt; min → BLOCK · β|∇S| &gt; 1 → STEP_UP</text><text class="dim" x="554" y="130">too regular → BLOCK</text>
@@ -146,13 +146,13 @@
   <text class="dim" x="24" y="255">tiers switch on one at a time: THROTTLE → STEP_UP → BLOCK → ISOLATE; a verdict above the tiers that are on is enforced as the highest one on</text>
   <text class="dim" x="24" y="275">a flagged genuine action waits in quarantine; the owner&rsquo;s answer teaches the baseline. A big shift is held for him to confirm.</text>
   <text class="dim" x="24" y="295">an envelope or credential refusal is authorisation, not behaviour: BLOCK at once, in every mode</text>
-</svg>
+</svg></div>
 <div class="panel" id="trace"><h3>Your last run, traced</h3><p class="note">Hand a key to a script above and this fills with the exact numbers each action was judged on.</p></div>
 </section>
 
 <section id="results">
 <h2>Results &mdash; sealed before the code, failures shown</h2>
-<p>Every claim below was committed to git <b>before</b> any code that measures it existed (<a id="seal-link" href="https://github.com/sjgant80-hub/bes-inward/blob/65a6364/measure/claims.json">the seal, 65a6364</a>). The numbers the watch uses were picked on earlier data only, then frozen (<a id="seal2-link" href="https://github.com/sjgant80-hub/bes-inward/blob/main/params.json">params.json</a>), then the claims were measured on the most recent three weeks, which nothing had read. <b>Real</b> = this estate&rsquo;s own behaviour: the owner&rsquo;s turns and his agent&rsquo;s actions, kept on the device &mdash; only counts and rates are published. <b>Synthetic</b> = the seeded mirror CI re-runs byte for byte.</p>
+<p>Every claim below was committed to git <b>before</b> any code that measures it existed (<a id="seal-link" href="https://github.com/sjgant80-hub/bes-inward/blob/65a6364/measure/claims.json">the seal, 65a6364</a>). The numbers the watch uses were picked on earlier data only, then frozen (<a id="seal2-link" href="https://github.com/sjgant80-hub/bes-inward/blob/main/params.json">params.json</a>), then the claims were measured on the most recent three weeks, which nothing had read. <b>Real</b> = this estate&rsquo;s own behaviour: the owner&rsquo;s turns and his agent&rsquo;s actions, kept on the device &mdash; only counts and rates are published. <b>Synthetic</b> = the seeded mirror CI re-runs byte for byte. In the sealed claims, <b>Simon</b> is the owner and <b>Kar</b> is his AI agent.</p>
 <div class="scroll"><table class="tbl" id="restbl"><thead><tr><th>claim</th><th>what it says</th><th>real</th><th>synthetic</th></tr></thead><tbody><tr><td colspan="4" class="note">loading receipts…</td></tr></tbody></table></div>
 <div class="panel" id="realdetail"><h3>What the real measurement saw</h3><p class="note">loading…</p></div>
 </section>
@@ -228,6 +228,7 @@
 
 <h3 id="risks">Risks, answered straight</h3>
 <div class="scroll"><table class="tbl"><tbody>
+  <tr><th>Not every script is caught.</th><td>In the sealed measurement a script that drives a stolen key at a <b>fixed pace</b> or at <b>machine speed</b> was caught; one that keeps the identity&rsquo;s own requests but spreads them over <b>random hours</b>, <b>shuffles their order</b>, or <b>borrows the other identity&rsquo;s timing</b> was not caught within ten actions. Those claims (B1, B2, B6) failed and are shown as failed in <a href="#results">Results</a>. Against those, the envelope still binds the agent, and money, deals and public claims still need the owner&rsquo;s live yes.</td></tr>
   <tr><th>It will ask you to confirm real actions sometimes.</th><td>Yes &mdash; the measured rate on the owner&rsquo;s real behaviour is in <a href="#results">Results</a>, with the number of distinct times he would have been asked. Each answer teaches it.</td></tr>
   <tr><th>A perfect copy of your own past behaviour.</th><td>A thief who replays your exact past week, rhythm and all, is the hardest case &mdash; Gary W. Floyd&rsquo;s own paper says behaviour alone does not stop mimicry. We sealed that as a predicted limit (L1) and measured it; the result is in Results.</td></tr>
   <tr><th>The first two weeks.</th><td>While it learns it enforces nothing. The other layers (signatures, counters, the LIGHT barrier) still refuse forgeries from the first second.</td></tr>

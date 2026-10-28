@@ -32,3 +32,10 @@ test('pack refuses what is not JSON', () => {
   assert.equal(pack(c).ok, false);
   assert.equal(pack(() => 1).ok, false);
 });
+
+test('witness: exactly 40 bytes with the magic is read as a store (and refused for its body), not as a stranger', () => {
+  const b = new Uint8Array(40); b.set(MAGIC, 0);
+  assert.equal(unpack(b).ok, false);
+  assert.notEqual(unpack(b).why, 'not a BES store');
+  assert.equal(unpack(b.slice(0, 39)).why, 'not a BES store');
+});

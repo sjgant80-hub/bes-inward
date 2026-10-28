@@ -77,7 +77,7 @@ $('bptbl').querySelector('tbody').innerHTML = ORGANS.map(([src, what]) => { cons
 // ── 1 · grow the baselines ──
 const START = Date.UTC(2026, 6, 20), DAYS = 42, END = START + DAYS * DAY;
 const S = {}, W = {};
-let msPerAction = 0.5;
+let msPerAction = 0.5, measured = false;
 const NAMES = { simon: 'the owner (a person)', night: 'the agent — nightly loop', session: 'the agent — working sessions' };
 async function grow() {
   $('grow').disabled = true;
@@ -103,7 +103,7 @@ async function grow() {
     W[name] = w;
     rows.push('<tr><td>' + NAMES[name] + '</td><td>' + xs.length + '</td><td>' + (formedDay || '—') + '</td><td>' + fp + ' of ' + judged + ' (' + pct(fp, judged) + ')</td><td>' + fx(w.bars && w.bars.rhythmBar) + '</td></tr>');
   }
-  msPerAction = spent / total;
+  msPerAction = spent / total; measured = true;
   $('growtbl').querySelector('tbody').innerHTML = rows.join('');
   $('steal').disabled = false;
   $('kstat').textContent = 'Kernels running in this tab · ' + total + ' synthetic actions judged at ' + msPerAction.toFixed(3) + ' ms each.';
@@ -255,7 +255,7 @@ function drawCost() {
   const r = costCase({ people: Math.max(0, Math.floor(+$('c-people').value || 0)), agents: Math.max(0, Math.floor(+$('c-agents').value || 0)), actionsPerDay: Math.max(0, Math.floor(+$('c-actions').value || 0)), msPerAction, promptsPerWeek: prompts * Math.max(1, Math.floor(+$('c-people').value || 0)), minutesPerPrompt: Math.max(0, +$('c-min').value || 0) }, COSTS.prices);
   if (!r.ok) { $('c-lines').textContent = r.why; return; }
   $('c-rented').textContent = pounds(r.rented); $('c-bes').textContent = pounds(r.bes); $('c-save').textContent = pounds(r.saving);
-  $('c-lines').innerHTML = 'Rented: each person × US$10.00 a month × 12, at the Bank of England rate (agents are not counted on that side — their workload identities are priced separately — so it is understated). Ours: licence £0; electricity ' + pounds(r.lines.besPower) + ' for ' + r.lines.cpuHours.toFixed(3) + ' CPU-hours at the chip&rsquo;s 55 W maximum (' + msPerAction.toFixed(3) + ' ms an action, measured in this tab); people&rsquo;s time ' + pounds(r.lines.besPeopleTime) + ' — ' + Math.round(r.lines.promptMinutes) + ' minutes a year answering step-ups at the National Living Wage, at the rate measured on the owner&rsquo;s real behaviour per person (' + prompts.toFixed(2) + ' a week). Sources: ' + COSTS.sources.map((s) => '<a href="' + esc(s.url) + '">' + esc(s.id) + '</a>').join(' · ') + '.';
+  $('c-lines').innerHTML = 'Rented: each person × US$10.00 a month × 12, at the Bank of England rate (agents are not counted on that side — their workload identities are priced separately — so it is understated). Ours: licence £0; electricity ' + pounds(r.lines.besPower) + ' for ' + r.lines.cpuHours.toFixed(3) + ' CPU-hours at the chip&rsquo;s 55 W maximum (' + msPerAction.toFixed(3) + ' ms an action, ' + (measured ? 'measured in this tab' : 'an estimate until you grow the baselines, then measured in this tab') + '); people&rsquo;s time ' + pounds(r.lines.besPeopleTime) + ' — ' + Math.round(r.lines.promptMinutes) + ' minutes a year answering step-ups at the National Living Wage, at the rate measured on the owner&rsquo;s real behaviour per person (' + prompts.toFixed(2) + ' a week). Sources: ' + COSTS.sources.map((s) => '<a href="' + esc(s.url) + '">' + esc(s.id) + '</a>').join(' · ') + '.';
 }
 for (const k of ['c-people', 'c-agents', 'c-actions', 'c-min']) $(k).addEventListener('input', drawCost);
 drawCost();

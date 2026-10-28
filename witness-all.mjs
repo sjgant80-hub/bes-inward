@@ -33,14 +33,14 @@ export const PAIRS = [
   ['bes', 'src/bes.mjs', ['test/bes.test.mjs', 'test/fuzz.test.mjs']],
   ['entropy', 'src/entropy.mjs', ['test/entropy.test.mjs', FUZZ]],
   ['gep', 'src/gep.mjs', ['test/gep.test.mjs', FUZZ]],
-  ['watch', 'src/watch.mjs', ['test/watch.test.mjs', FUZZ]],
+  ['watch', 'src/watch.mjs', ['test/watch.test.mjs', 'test/watch2.test.mjs', FUZZ]],
   ['trust', 'src/trust.mjs', ['test/trust.test.mjs', FUZZ]],
   ['envelope', 'src/envelope.mjs', ['test/envelope.test.mjs', FUZZ]],
   ['recovery', 'src/recovery.mjs', ['test/recovery.test.mjs', FUZZ]],
   ['drivers', 'src/drivers.mjs', ['test/drivers.test.mjs', FUZZ]],
-  ['stack', 'src/stack.mjs', ['test/stack.test.mjs', FUZZ]],
+  ['stack', 'src/stack.mjs', ['test/stack.test.mjs', 'test/stack2.test.mjs', FUZZ]],
   ['store', 'src/store.mjs', ['test/store.test.mjs', FUZZ]],
-  ['judge', 'measure/judge.mjs', ['test/judge.test.mjs', FUZZ]],
+  ['judge', 'measure/judge.mjs', ['test/judge.test.mjs', 'test/judge2.test.mjs', FUZZ]],
   ['cost', 'src/cost.mjs', ['test/cost.test.mjs']],
 ];
 const args = process.argv.slice(2);

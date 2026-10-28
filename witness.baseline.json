@@ -13,5 +13,124 @@
     "mutation": "< → <=",
     "snippet": "if (events.length < 2) return 0;",
     "reason": "equivalent: they differ only at length===2, a single-gap window whose MAD is 0, so variability is 0 whether returned early (<=2) or computed (<2) — identical for every window."
+  },
+  {
+    "mutation": "> → >=",
+    "snippet": "return VERDICTS[ra > rb ? ra : rb];",
+    "reason": "worst(): when ra === rb both branches return the same verdict, so > and >= give the identical result for every pair of inputs.",
+    "file": "src/gep.mjs",
+    "line": 51
+  },
+  {
+    "mutation": "> → >=",
+    "snippet": "if (E > 2.5 * THETA) {",
+    "reason": "E is a logistic of a continuous measure; it equals exactly 2.5θ only on a set of measure zero, and the tests pin both sides of the rung at ±1e-9. No reachable input separates > from >= in practice; rewriting it after the sealed measurement would change the measured kernel.",
+    "file": "src/gep.mjs",
+    "line": 90
+  },
+  {
+    "mutation": "> → >=",
+    "snippet": "} else if (E > 2 * THETA) { verdict = 'STEP_UP'; row = 'E > 2θ'; }",
+    "reason": "Same as the 2.5θ rung: E exactly equal to 2θ has measure zero; both sides are pinned at ±1e-9. (The > inside the row text on this line is killed separately: the tests assert the exact row string.)",
+    "file": "src/gep.mjs",
+    "line": 93
+  },
+  {
+    "mutation": "> → >=",
+    "snippet": "if (rank(verdict) < 2 && E > THETA && o.beta * o.grad > 1) { verdict = 'STEP_UP'; row = 'r",
+    "reason": "E > θ: exact equality of the logistic with θ has measure zero and both sides are pinned at ±1e-9. The other > on this line (β|∇S| > 1) is killed by the grad = 1 test, and the one inside the row text by the exact-row assertion; this entry is for the θ comparison.",
+    "file": "src/gep.mjs",
+    "line": 97
+  },
+  {
+    "mutation": "< → <=",
+    "snippet": "return a < 1 ? a : 1;",
+    "reason": "salience(): at a === 1 both branches return 1, so < and <= give the identical value for every input.",
+    "file": "src/gep.mjs",
+    "line": 63
+  },
+  {
+    "mutation": "<= → <",
+    "snippet": "if (n <= 0) return out;",
+    "reason": "normalise(): with n === 0 no entry is positive, so the loop below adds nothing and returns the same empty object either way.",
+    "file": "src/entropy.mjs",
+    "line": 164
+  },
+  {
+    "mutation": "> → >=",
+    "snippet": "const size = Number.isSafeInteger(e.size) && e.size > 0 ? e.size : 0;",
+    "reason": "actionOf(): at size === 0 both branches give 0, so > and >= produce the identical action for every input.",
+    "file": "src/entropy.mjs",
+    "line": 61
+  },
+  {
+    "mutation": "> → >=",
+    "snippet": "const n = Object.values(table).reduce((s, c) => s + (Number.isFinite(c) && c > 0 ? c : 0),",
+    "reason": "normalise(): a count of exactly 0 adds 0 to the total whichever branch is taken, so the sum is identical for every table.",
+    "file": "src/entropy.mjs",
+    "line": 163
+  },
+  {
+    "mutation": "> → >=",
+    "snippet": "const b = Number.isFinite(B[k]) && B[k] > 0 ? B[k] : 0;",
+    "reason": "klFeature(): a baseline probability of exactly 0 yields b = 0 from either branch, so the divergence is identical. (The && on this line is killed by the infinite-baseline test.)",
+    "file": "src/entropy.mjs",
+    "line": 185
+  },
+  {
+    "mutation": "< → <=",
+    "snippet": "for (let i = 1; i < t.length; i++) if (t[i] > t[i - 1]) gaps.push(t[i] - t[i - 1]);",
+    "reason": "rhythmOf(): the extra iteration reads t[t.length], which is undefined; undefined > t[i-1] is false, so no gap is pushed and the result is identical.",
+    "file": "src/watch.mjs",
+    "line": 72
+  },
+  {
+    "mutation": "&& → ||",
+    "snippet": "function samplesOf(cal) { try { return isObj(cal) && Array.isArray(cal.chunks) ? cal.chunk",
+    "reason": "samplesOf(): every input the mutant lets through (an object without chunks, a non-array chunks) throws inside the try and returns [] — the same as the original returns for it.",
+    "file": "src/watch.mjs",
+    "line": 98
+  },
+  {
+    "mutation": "&& → ||",
+    "snippet": "const sizesOf = (dist) => Object.fromEntries(FEATURES.map((f) => [f, Object.keys(isObj(dis",
+    "reason": "sizesOf() is only ever called with a distribution built by distOf/emaDist, whose every feature row is an object; the mutant only differs for a non-object distribution, which no caller can pass.",
+    "file": "src/watch.mjs",
+    "line": 166
+  },
+  {
+    "mutation": "> → >=",
+    "snippet": "if (w.formed && base.shifts.length > 0 && shift > bound) return { ...w, pend: emptyPend(),",
+    "reason": "shift > bound: exact equality of two continuous distances has measure zero after formation. The other > on this line (shifts.length > 0) is killed by the empty-shifts test; this entry is for the bound comparison.",
+    "file": "src/watch.mjs",
+    "line": 195
+  },
+  {
+    "mutation": "> → >=",
+    "snippet": "if (owed > 0) {",
+    "reason": "With owed === 0 the mutant computes a challenge and calls verifyWork(…, 0 bits), which returns true for any bits ≤ 0, so the packet proceeds exactly as in the original.",
+    "file": "src/stack.mjs",
+    "line": 73
+  },
+  {
+    "mutation": "> → >=",
+    "snippet": "const spent = k.actor === 'kar' && Number.isSafeInteger(a.cost) && a.cost > 0 ? node.spent",
+    "reason": "A cost of exactly 0 adds 0 to what the agent has spent whichever branch is taken. (The two && on this line are killed by the owner-spend and 2.5-cost tests.)",
+    "file": "src/stack.mjs",
+    "line": 101
+  },
+  {
+    "mutation": "|| → &&",
+    "snippet": "if (xs.length === 0 || !(n >= 1)) return [];",
+    "reason": "run(): when only one of the two conditions holds the mutant goes on, but take = min(n, length) is then 0, negative or NaN, and the slice is empty — the same [] the original returns.",
+    "file": "src/drivers.mjs",
+    "line": 49
+  },
+  {
+    "mutation": "> → >=",
+    "snippet": "for (let i = p.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); const x = p[",
+    "reason": "permutation(): the extra iteration at i = 0 draws j = floor(r() × 1) = 0 and swaps p[0] with itself, so the permutation returned is identical.",
+    "file": "src/drivers.mjs",
+    "line": 42
   }
 ]

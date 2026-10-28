@@ -58,3 +58,8 @@ test('confirm-shift may be signed by Simon’s daily key or the offline key', ()
   assert.equal(applyRecovery(w, rec({ act: 'confirm-shift', by: REC }), c({})).ok, true);
   assert.equal(applyRecovery(w, rec({ act: 'confirm-shift', by: 'f'.repeat(64) }), c({})).why, 'not signed by the owner');
 });
+
+test('witness: an eight-character nonce is enough', () => {
+  assert.equal(recoveryBody({ identity: 'simon', act: 'observe', nonce: '12345678', at: NOW, by: REC }).ok, true);
+  assert.equal(recoveryBody({ identity: 'simon', act: 'observe', nonce: '1234567', at: NOW, by: REC }).ok, false);
+});

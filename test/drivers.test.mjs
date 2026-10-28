@@ -118,3 +118,16 @@ test('synthetic streams are seeded, ordered and shaped', () => {
   assert.ok(session({ days: 30 }).some((e) => e.priv === 'outward'));
   assert.ok(human(null).length > 100);
 });
+
+test('witness: exact seeded outputs are pinned', () => {
+  const long = Array.from({ length: 100 }, (_, i) => ev(i, T + i));
+  assert.equal(run(long, 1, 9).length, 1);
+  assert.deepEqual(permutation(6, 3), permutation(6, 3));
+  const p = permutation(6, 3), q = (() => { const r = rng(3), x = [0, 1, 2, 3, 4, 5]; for (let i = 5; i > 0; i--) { const j = Math.floor(r() * (i + 1)); const y = x[i]; x[i] = x[j]; x[j] = y; } return x; })();
+  assert.deepEqual(p, q);
+  const g = rng(5), first = T + 1 + Math.floor(g() * DAY);
+  const u = uniform(long.slice(0, 1), T, 5);
+  assert.equal(u[0].t, first);
+  const two = uniform(long.slice(0, 6), T, 5);
+  assert.deepEqual(two.map((e) => e.size), permutation(6, 6).map((i) => long[i].size));
+});

@@ -134,3 +134,22 @@ test('Gary\u2019s key finding: overly regular timing below the identity\u2019s o
   assert.equal(v({ ...top, rhythm: 0, rhythmBar: 1 }).verdict, 'ISOLATE');      // never lowers ISOLATE
   assert.equal(v({ d: Math.log(5) + h, rhythm: 0, rhythmBar: 1 }).row, 'E > 2.5θ');
 });
+
+test('witness: exact rows, ties and the unknown-verdict rule', () => {
+  assert.equal(v({ d: -Math.log(2) + h, grad: 1 + h }).row, 'rapid escalation: β|∇S| > 1');
+  assert.equal(v({ d: Math.log(5) + h }).row, 'E > 2.5θ');
+  assert.equal(v({ d: h }).row, 'E > 1.5θ');
+  assert.equal(worst('ALLOW', 'ALLOW'), 'ALLOW');
+  assert.equal(worst('ALLOW', 'THROTTLE'), 'THROTTLE');
+  assert.equal(worst('THROTTLE', 'ALLOW'), 'THROTTLE');
+  assert.equal(decide(null).row, 'unreadable');
+  assert.equal(decide(7).row, 'unreadable');
+  const p = (name, kl, Amin) => ({ name, d: -1, eps: 0, k: 1, kl, Amin });
+  const tie = decide({ ...base, parts: [p('first', 0.5, 0.9), p('second', 0.5, 0.9)] });
+  assert.equal(tie.part, 'first');
+  const desc = decide({ ...base, parts: [p('b', 0.9, 0.1), p('a', 0.6, 0.1)] });
+  near(desc.A, Math.exp(-0.9));
+  const lowFirst = decide({ ...base, parts: [p('low', 0.5, 0.9), p('ok', 0.1, 0.1)] });
+  assert.equal(lowFirst.part, 'low');
+  near(lowFirst.A, Math.exp(-0.5));
+});

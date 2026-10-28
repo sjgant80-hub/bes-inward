@@ -142,3 +142,8 @@ test('a real Ed25519 signature over the canonical material verifies, and a chang
   assert.equal(await verifyBytes(simon.id, new TextEncoder().encode(materialOf({ ...b, budget: 101 })), sig), false);
   assert.equal(hex(sig).length, 128);
 });
+
+test('witness: an empty daily window [h, h) is refused', () => {
+  assert.equal(envelopeBody({ ...P, hours: [8, 8] }).ok, false);
+  assert.equal(envelopeBody({ ...P, hours: [8, 9] }).ok, true);
+});

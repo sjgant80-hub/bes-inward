@@ -175,3 +175,13 @@ test('klOf: per feature, per domain and the weighted total', () => {
   near(z.F.gap, Math.log(1 / ((1 + 0.5 / 5) / 1.5)));
   assert.equal(klOf(null, null, 0.5).total, 0);
 });
+
+test('witness: same-millisecond actions are a burst; malformed state reads as empty; an infinite baseline value is ignored', () => {
+  const a = symbolsOf({ t: T, kind: 'a' }, emptyCtx());
+  assert.equal(symbolsOf({ t: T, kind: 'b' }, a.ctx).sym.burst, 'b:1');
+  assert.deepEqual(stateOf({}).H, { net: 0, beh: 0, auth: 0 });
+  assert.deepEqual(stateOf({ counts: 5 }).H, { net: 0, beh: 0, auth: 0 });
+  const k = klFeature({ a: 1 }, { a: Infinity }, 0.5);
+  assert.ok(Number.isFinite(k) && k > 0, String(k));
+  near(k, Math.log(1 / ((0.5 / 2) / 1.5)));
+});
