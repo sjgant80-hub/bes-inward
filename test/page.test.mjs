@@ -44,6 +44,35 @@ test('credits, verbatim; supplier; no private cosmology or reserved terms; no pr
   assert.match(text, /MIT, no licence fee/);
 });
 
+test('no money figure or statistic is typed into the page: they are rendered from the sourced files', () => {
+  assert.doesNotMatch(html, /(US\$|\$|£|€)\s?\d/);
+  const brochure = html.slice(html.indexOf('<section id="brochure">'), html.indexOf('<section id="paper">'));
+  assert.ok(brochure.length > 1000);
+  assert.doesNotMatch(brochure.replace(/<[^>]+>/g, ' '), /\d\s?%/);
+  assert.doesNotMatch(text, /per[- ]seat/i);
+  for (const id of ['p-p2', 'p-wl', 'p-why', 'b-breach', 'c-src', 'c-lines']) assert.ok(ids.includes(id), '#' + id + ' is filled from the sources');
+});
+
+test('every sourced figure the page renders has a primary source and the date it was read', () => {
+  const c = JSON.parse(readFileSync(new URL('../costs/sources.json', import.meta.url), 'utf8'));
+  for (const k of Object.keys(c.prices)) {
+    const s = c.sources.find((x) => x.key === k);
+    assert.ok(s, 'a source for ' + k);
+    assert.match(s.url, /^https:\/\//);
+    assert.match(s.read, /^\d{4}-\d{2}-\d{2}$/);
+    assert.ok(s.what.length > 20 && s.quote.length > 5, k);
+  }
+  assert.equal(c.basis, 'vendor/sovereign-enterprise/basis.json');
+  assert.match(app, /vendor\/sovereign-enterprise\/basis\.json/);
+});
+
+test('the supplier, the terms and the exit are on the page', () => {
+  assert.match(text, /contact them through that site/);
+  assert.match(text, /Support, service levels, warranty and liability\s+are agreed per deployment/);
+  assert.match(text, /keeps running without us/);
+  assert.match(text, /Exit:/);
+});
+
 test('no inline style attribute: the CSP (style-src self) would block it', () => {
   assert.doesNotMatch(html, /\sstyle="/);
   assert.doesNotMatch(app, /setAttribute\('style'/);

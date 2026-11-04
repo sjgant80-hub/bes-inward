@@ -31,6 +31,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: the gate is witness v0.6, byte for byte
+        run: |
+          git clone --depth 1 --branch v0.6 https://github.com/sjgant80-hub/witness.git /tmp/witness-v0.6
+          cmp /tmp/witness-v0.6/witness.mjs .witness/witness.mjs
+          cmp /tmp/witness-v0.6/runner.mjs .witness/runner.mjs
       - name: mutation and fuzz gate, no unreviewed survivors, nothing capped
         run: |
           node witness-all.mjs ${{ matrix.kernel }}

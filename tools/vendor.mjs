@@ -17,6 +17,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const HOME = 'C:/Users/sjgan';
 const FALL_KIT = '9244d6128c7be0094c9d800acac0a9ee70ecdd97';
 const BREAK_IT = 'badc6ff158b60b764aae68b3deae18014f4b5480';
+const SOVEREIGN = '003e44795bc0ef90c92b7ee6a53160f51be1be79';
 const PINS = [
   { repo: 'fall-kit', commit: FALL_KIT, src: 'core/identity.mjs', to: 'fall-kit-core/identity.mjs', what: 'one Ed25519 key in every form the kernels take it (WebCrypto)' },
   { repo: 'fall-kit', commit: FALL_KIT, src: 'core/vendor/light/packet.mjs', to: 'fall-kit-core/vendor/light/packet.mjs', what: 'LIGHT: the signed packet and its verify-before-decode door (layers 1 and 2)' },
@@ -26,6 +27,7 @@ const PINS = [
   { repo: 'break-it', commit: BREAK_IT, src: 'src/wire.mjs', to: 'break-it/wire.mjs', what: 'break-it wire constants the immune fingerprint reads' },
   { repo: 'break-it', commit: BREAK_IT, src: 'src/immune.mjs', to: 'break-it/immune.mjs', what: 'the immune system: every refusal becomes memory (layer 4)' },
   { repo: 'break-it', commit: BREAK_IT, src: 'src/rebound.mjs', to: 'break-it/rebound.mjs', what: 'the rebound: proof-of-work owed by a source refused too often — the tarpit (layer 4)' },
+  { repo: 'sovereign-enterprise', commit: SOVEREIGN, src: 'data/basis.json', to: 'sovereign-enterprise/basis.json', what: "the estate's shared, sourced cost basis (ONS wage, CPI, DESNZ electricity, ECB exchange rate) the cost case reads" },
 ];
 const sha = (b) => createHash('sha256').update(b).digest('hex');
 const SOURCES = join(ROOT, 'vendor', 'SOURCES.json');

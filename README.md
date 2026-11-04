@@ -37,8 +37,9 @@ Powered by the Konomi architecture, created by Thomas Frumkin.
 | frozen numbers | [`params.json`](params.json) | chosen by `tools/tune.mjs` on data before 7 Oct 2026 only (rule in the seal) |
 | real measurement | `node measure/measure.mjs --real` (local) | the owner's and agent's real behaviour 7–28 Oct → [`receipts/real.json`](receipts/real.json): counts and rates only, plus each private input's SHA-256 |
 | synthetic mirror | `node measure/measure.mjs --synthetic --check` (CI) | the same claims on seeded synthetic streams, reproduced byte for byte |
-| mutation gate | `node witness-all.mjs` (CI, one job per kernel) | every operator flipped; no unreviewed survivor; nothing capped |
-| vendored kernels | `node tools/vendor.mjs --check` (CI) | LIGHT, the wallet and identity (fall-kit), immune + rebound (break-it) byte-identical to their pins |
+| mutation gate | `node witness-all.mjs` (CI, one job per kernel) | witness v0.6 (CI checks `.witness/` byte for byte against the v0.6 tag); every operator flipped; no unreviewed survivor; nothing capped |
+| vendored kernels | `node tools/vendor.mjs --check` (CI) | LIGHT, the wallet and identity (fall-kit), immune + rebound (break-it) and the estate's sourced cost basis (sovereign-enterprise `data/basis.json`) byte-identical to their pins |
+| the buyer's cost case | `src/cost.mjs` (gated) | computed from the reader's numbers, the vendored basis (ONS median wage, CPI, DESNZ electricity, ECB rate) and [`costs/sources.json`](costs/sources.json) (Entra ID P2, Entra Workload ID, the chip's maximum draw, IBM, Verizon — each with its primary source and the date read); the page renders every figure from those files, never typed |
 | suites | `node --test test/*.test.mjs` | unit + a hostile-input battery: no kernel throws on junk |
 
 Failures are kept: a claim that failed stays failed in the receipt and on the page.
@@ -52,7 +53,7 @@ word count, and never stores it. Nothing private is in this repository, its CI, 
 ## Layout
 
 `src/` kernels (entropy, gep, watch, trust, envelope, recovery, stack, store, drivers, cost, synth; v1 `bes.mjs`,
-`stream.mjs`) · `measure/` claims, harness, judge, measurement · `tools/` vendor, extract, tune (local) · `vendor/`
-pinned kernels · `page/` + `index.html` the live page · `receipts/`.
+`stream.mjs`) · `measure/` claims, harness, judge, measurement · `tools/` vendor, extract, tune, live (local) · `vendor/`
+pinned kernels and the cost basis · `costs/` the sourced prices · `page/` + `index.html` the live page · `receipts/`.
 
 MIT. Supplier: [AI Native Solutions](https://www.ai-nativesolutions.com). See [`NOTICE`](NOTICE).

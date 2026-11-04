@@ -66,6 +66,14 @@
    "src": "src/rebound.mjs",
    "sha256": "0bb4c77219dab7594ec65aa1ce47c1765ae3e2889c30e764cf8ed29cee364134",
    "what": "the rebound: proof-of-work owed by a source refused too often — the tarpit (layer 4)"
+  },
+  {
+   "path": "sovereign-enterprise/basis.json",
+   "repo": "sjgant80-hub/sovereign-enterprise",
+   "commit": "003e44795bc0ef90c92b7ee6a53160f51be1be79",
+   "src": "data/basis.json",
+   "sha256": "83e9c2effa2f81596dcfa7110f030940032c1910cdf928d27d628ae59d73bb42",
+   "what": "the estate's shared, sourced cost basis (ONS wage, CPI, DESNZ electricity, ECB exchange rate) the cost case reads"
   }
  ]
 }

@@ -38,7 +38,8 @@
   <li>Make the agent act <b>outside its envelope</b> &mdash; pick a fault and see which check stops it.</li>
   <li><b>Lock yourself out, then recover</b> with the offline key. Try the daily key and a replay too.</li>
   <li>Send <b>one packet through all four layers</b> and see which layer decided, what the immune system learned, and what the tarpit now charges.</li>
-  <li>Read <a href="#how">How it works</a> &mdash; the diagram fills in with the numbers of your last run.</li>
+  <li>Read <a href="#how">How it works</a> &mdash; the diagram fills in with the numbers of your last run, and a second one traces what the real measurement did.</li>
+  <li>Put your own numbers into <a href="#cost">the cost case</a> in the brochure &mdash; people, agents, actions a day &mdash; and read where every figure comes from.</li>
 </ol>
 </section>
 
@@ -147,6 +148,26 @@
   <text class="dim" x="24" y="275">a flagged genuine action waits in quarantine; the owner&rsquo;s answer teaches the baseline. A big shift is held for him to confirm.</text>
   <text class="dim" x="24" y="295">an envelope or credential refusal is authorisation, not behaviour: BLOCK at once, in every mode</text>
 </svg></div>
+<h3>What the real measurement did, traced from its receipt</h3>
+<p class="note">Each row is one identity on the owner&rsquo;s machine, read from <a href="https://github.com/sjgant80-hub/bes-inward/blob/main/receipts/real.json">receipts/real.json</a> as this page loads: every action recorded, the first 14 days watched and never enforced, then the sealed test period judged against that identity&rsquo;s own baseline.</p>
+<div class="scroll dia-wrap"><svg class="dia" viewBox="0 0 1000 300" role="img" aria-label="The real measurement, per identity: actions recorded, formation, the test period, and how many were stepped up">
+  <rect class="box" x="10" y="20" width="225" height="72" rx="12"/><text x="24" y="44">the owner (his own turns)</text><text class="dim" x="24" y="66" id="r-o-1">…</text>
+  <rect class="box" x="255" y="20" width="225" height="72" rx="12"/><text x="269" y="44">formation: observe only</text><text class="dim" x="269" y="66" id="r-o-2">…</text>
+  <rect class="box" x="500" y="20" width="225" height="72" rx="12"/><text x="514" y="44" id="r-o-3t">the sealed test period</text><text class="dim" x="514" y="66" id="r-o-3">…</text>
+  <rect class="box hot" x="745" y="20" width="245" height="72" rx="12"/><text x="759" y="44" id="r-o-4a">…</text><text class="dim" x="759" y="66" id="r-o-4b">…</text>
+  <rect class="box" x="10" y="108" width="225" height="72" rx="12"/><text x="24" y="132">the agent, working sessions</text><text class="dim" x="24" y="154" id="r-s-1">…</text>
+  <rect class="box" x="255" y="108" width="225" height="72" rx="12"/><text x="269" y="132">formation: observe only</text><text class="dim" x="269" y="154" id="r-s-2">…</text>
+  <rect class="box" x="500" y="108" width="225" height="72" rx="12"/><text x="514" y="132" id="r-s-3t">the sealed test period</text><text class="dim" x="514" y="154" id="r-s-3">…</text>
+  <rect class="box hot" x="745" y="108" width="245" height="72" rx="12"/><text x="759" y="132" id="r-s-4a">…</text><text class="dim" x="759" y="154" id="r-s-4b">…</text>
+  <rect class="box" x="10" y="196" width="225" height="72" rx="12"/><text x="24" y="220">the agent, nightly loop</text><text class="dim" x="24" y="242" id="r-n-1">…</text>
+  <rect class="box" x="255" y="196" width="225" height="72" rx="12"/><text x="269" y="220">formation: observe only</text><text class="dim" x="269" y="242" id="r-n-2">…</text>
+  <rect class="box" x="500" y="196" width="225" height="72" rx="12"/><text x="514" y="220" id="r-n-3t">the sealed test period</text><text class="dim" x="514" y="242" id="r-n-3">…</text>
+  <rect class="box hot" x="745" y="196" width="245" height="72" rx="12"/><text x="759" y="220" id="r-n-4a">…</text><text class="dim" x="759" y="242" id="r-n-4b">…</text>
+  <path class="arrow" d="M237 56H252"/><path class="arrow" d="M482 56H497"/><path class="arrow" d="M727 56H742"/>
+  <path class="arrow" d="M237 144H252"/><path class="arrow" d="M482 144H497"/><path class="arrow" d="M727 144H742"/>
+  <path class="arrow" d="M237 232H252"/><path class="arrow" d="M482 232H497"/><path class="arrow" d="M727 232H742"/>
+  <text class="dim" x="10" y="292" id="r-foot">…</text>
+</svg></div>
 <div class="panel" id="trace"><h3>Your last run, traced</h3><p class="note">Hand a key to a script above and this fills with the exact numbers each action was judged on.</p></div>
 </section>
 
@@ -161,7 +182,7 @@
 <h2>Blueprint &mdash; organ by organ</h2>
 <p>Every decision kernel is pure (no clock, no network, no files), total (junk in is a refusal or a step-up, never a crash) and mutation-gated: each operator is flipped and the tests must fail. Counts are read from the witness receipt.</p>
 <div class="scroll"><table class="tbl" id="bptbl"><thead><tr><th>organ</th><th>what it does</th><th>witness</th></tr></thead><tbody></tbody></table></div>
-<p class="note">Vendored byte-identical and pinned (re-checked in CI): LIGHT&rsquo;s packet door, codec and SHA-256, the wallet kernel and the Ed25519 identity from <a href="https://github.com/sjgant80-hub/fall-kit">fall-kit</a> core; the immune system and the rebound tarpit from <a href="https://github.com/sjgant80-hub/break-it">break-it</a>.</p>
+<p class="note">Vendored byte-identical and pinned (re-checked in CI): LIGHT&rsquo;s packet door, codec and SHA-256, the wallet kernel and the Ed25519 identity from <a href="https://github.com/sjgant80-hub/fall-kit">fall-kit</a> core; the immune system and the rebound tarpit from <a href="https://github.com/sjgant80-hub/break-it">break-it</a>; the estate&rsquo;s shared, sourced cost basis from <a href="https://github.com/sjgant80-hub/sovereign-enterprise">sovereign-enterprise</a>. The rows without a witness count are the parts the gate does not mutate, each with the reason the repository gives.</p>
 </section>
 
 <section id="adoption">
@@ -171,13 +192,14 @@
   <div class="card"><h4>What changes on day one</h4><p>Nothing visible. It watches for 14 days and enforces nothing. Then the first tier switches on: odd-looking actions are admitted but flagged.</p></div>
   <div class="card"><h4>What changes for people</h4><p>If an action is unusual, you are asked to confirm it once. Your answer teaches it. It never reads what you wrote &mdash; it keeps the shape of actions: when, what kind, which project, how big.</p></div>
   <div class="card"><h4>What changes for your agents</h4><p>An agent acts only inside an envelope you signed, with a budget the wallet counts. Money, deals and public claims are never standing permissions: each needs your live yes to those exact words.</p></div>
+  <div class="card"><h4>What it runs on</h4><p>Node.js 22 or later on the machine it protects, or a modern browser. No packages to install, no network calls from the kernels, no cloud account. It plugs in at one door per signed action (<a href="#faq">FAQ</a>).</p></div>
 </div>
 <h3>Roll-out, step by step</h3>
 <ol class="steps">
   <li><b>Install</b> beside the node that receives your signed actions. Pin your daily key, your agent&rsquo;s key, and your offline recovery key (keep that one off the machine).</li>
   <li><b>Sign the agent&rsquo;s envelope</b>: its verbs, its budget, its hours, its expiry.</li>
   <li><b>Observe for 14 days.</b> Every verdict is recorded and nothing is enforced.</li>
-  <li><b>Switch on THROTTLE</b>, then <b>STEP_UP</b>, then <b>BLOCK</b>, then <b>ISOLATE</b> &mdash; each only after the one before it has run clean.</li>
+  <li><b>Switch on THROTTLE</b>, then <b>STEP_UP</b>, then <b>BLOCK</b>, then <b>ISOLATE</b> &mdash; each only after the one before it has run clean for at least 7 days (the switch, <code>tools/live.mjs --next-tier</code>, refuses sooner). From install to every tier on is about five weeks; nothing is switched on by itself.</li>
   <li><b>Keep the recovery key offline.</b> It is the way back from any block, and it is never used for daily work.</li>
 </ol>
 </section>
@@ -196,24 +218,31 @@
 </div>
 
 <h3 id="cost">The cost case &mdash; your numbers</h3>
+<p class="note">Change any number. The case is computed in your tab by <code>src/cost.mjs</code> (mutation-gated, see the <a href="#blueprint">blueprint</a>) from your inputs and the sourced figures listed under it &mdash; nothing in it is typed into this page. The two step-up rates start at what the real measurement saw; put in your own.</p>
 <div class="panel">
   <div class="row">
     <label>People holding keys<input id="c-people" type="number" min="0" step="1" value="10"></label>
     <label>AI agents on their own keys<input id="c-agents" type="number" min="0" step="1" value="2"></label>
     <label>Actions a day, all keys<input id="c-actions" type="number" min="0" step="100" value="20000"></label>
-    <label>Minutes per step-up answered<input id="c-min" type="number" min="0" step="0.5" value="1"></label>
+    <label>Step-ups a week, each person<input id="c-sp" type="number" min="0" step="0.01" value="0"></label>
+    <label>Step-ups a week, each agent<input id="c-sa" type="number" min="0" step="0.01" value="0"></label>
+    <label>Minutes to answer one<input id="c-min" type="number" min="0" step="0.5" value="1"></label>
+    <label>Years<input id="c-years" type="number" min="1" max="10" step="1" value="3"></label>
   </div>
   <div class="grid three gap-top">
-    <div><div class="note">renting identity protection per seat, a year</div><div class="money" id="c-rented">—</div></div>
-    <div><div class="note">the BES layer, a year (licence £0)</div><div class="money" id="c-bes">—</div></div>
-    <div><div class="note">the difference</div><div class="money" id="c-save">—</div></div>
+    <div><div class="note">the rented route, a year</div><div class="money" id="c-rented">—</div><div class="note" id="c-rented-n"></div></div>
+    <div><div class="note">the BES layer, a year (MIT, no licence fee)</div><div class="money" id="c-bes">—</div><div class="note" id="c-bes-n"></div></div>
+    <div><div class="note">the difference, a year</div><div class="money" id="c-save">—</div><div class="note" id="c-save-n"></div></div>
   </div>
   <p class="note" id="c-lines"></p>
+  <h4>Where every figure comes from</h4>
+  <ul class="note" id="c-src"><li>loading the sourced figures…</li></ul>
 </div>
 
 <h3 id="compare">Against what you pay now</h3>
-<p>The usual answer to stolen credentials is a rented, per-seat cloud identity service &mdash; for example Microsoft Entra ID P2, which includes ID Protection and risk-based Conditional Access, at <b>US$10.00 per user per month, paid yearly</b> (its own published price, read 28 October 2026). It sends your sign-in signals to the vendor&rsquo;s cloud and judges sign-ins. The BES layer judges <b>every action</b>, on <b>your</b> machine, for your people <b>and your AI agents</b>, and its behavioural data never leaves the device. You can run both; BES needs no vendor account to work.</p>
-<p class="note">Why it matters now: stolen passwords were the top way attackers got in until Verizon&rsquo;s 2026 report, where software vulnerabilities (31%) moved ahead of them; the average breach cost US$4.99 million in IBM&rsquo;s Cost of a Data Breach Report 2026, a record.</p>
+<p>The usual answer to stolen credentials is a rented cloud identity service, paid for each user by the month &mdash; for example <span id="p-p2">Microsoft Entra ID P2</span>. It sends your sign-in signals to the vendor&rsquo;s cloud and judges sign-ins. The BES layer judges <b>every action</b>, on <b>your</b> machine, for your people <b>and your AI agents</b>, and its behavioural data never leaves the device. For agents the rented route is a workload identity: <span id="p-wl">Microsoft Entra Workload ID</span>.</p>
+<p>Entra ID P2 also does things BES does not &mdash; single sign-on, privileged identity management, access reviews. If you keep it for those, BES still adds the one check it does not make &mdash; whether each action carrying a valid key looks like its holder &mdash; at the cost in the middle column alone. BES needs no vendor account to work.</p>
+<p class="note" id="p-why">Why it matters now: loading the sourced figures…</p>
 
 <h3 id="security">Security, data protection, compliance</h3>
 <ul>
@@ -223,8 +252,14 @@
   <li><b>Audit:</b> every verdict carries the row of the decision table that produced it and the part it was measured on.</li>
 </ul>
 
-<h3 id="support">Ownership and support</h3>
-<p>MIT-licensed: you own and run it, and it keeps running without us. Supplier: <a href="https://www.ai-nativesolutions.com">AI Native Solutions</a>. Support and service terms are agreed per deployment, in each deployment&rsquo;s agreement.</p>
+<h3 id="support">Ownership, support and exit</h3>
+<ul>
+  <li><b>Supplier:</b> <a href="https://www.ai-nativesolutions.com">AI Native Solutions</a>. To start, or to scope a deployment, contact them through that site.</li>
+  <li><b>Support, service levels, warranty and liability</b> are agreed per deployment, in each deployment&rsquo;s agreement.</li>
+  <li><b>Ownership:</b> MIT-licensed, no licence fee. You hold the source, the keys and the baselines. It runs on your machine and keeps running without us.</li>
+  <li><b>What is inside:</b> no npm packages. The only code from outside this repository is vendored byte for byte, pinned and re-hashed in CI, from the estate&rsquo;s own MIT-licensed repositories (fall-kit, break-it, sovereign-enterprise); the mutation gate is witness v0.6, also MIT.</li>
+  <li><b>Exit:</b> nothing to cancel and nothing to migrate out of a vendor&rsquo;s cloud. The baselines are files on your device, in LIGHT, and <code>src/store.mjs</code> reads them back to plain data. Stop running it and nothing else changes: your signatures, counters and existing security keep working.</li>
+</ul>
 
 <h3 id="risks">Risks, answered straight</h3>
 <div class="scroll"><table class="tbl"><tbody>
@@ -237,7 +272,7 @@
 </tbody></table></div>
 
 <h3 id="board">The case for the board</h3>
-<div class="rule"><p><b>Problem:</b> every security layer we had trusts a valid key; stolen credentials were the leading way in until this year, and a breach averages US$4.99 million. <b>Answer:</b> a fourth layer that makes a valid key insufficient on its own &mdash; behaviour must match, and the AI agent is bound to signed limits with the big decisions reserved to the owner. <b>Evidence:</b> measured on our own real behaviour against claims sealed before the code, failures published; kernels mutation-gated; the synthetic mirror re-run in CI on every push. <b>Cost:</b> no licence, our own hardware, electricity that rounds to nothing. <b>Risk:</b> a measured rate of confirmation prompts, a two-week learning period, and the mimicry limit &mdash; all on this page.</p></div>
+<div class="rule"><p><b>Problem:</b> every security layer we had trusts a valid key; stolen credentials were the leading way in until this year, and a breach averages <span id="b-breach">a record sum (IBM, 2026)</span>. <b>Answer:</b> a fourth layer that makes a valid key insufficient on its own &mdash; behaviour must match, and the AI agent is bound to signed limits with the big decisions reserved to the owner. <b>Evidence:</b> measured on our own real behaviour against claims sealed before the code, failures published; kernels mutation-gated; the synthetic mirror re-run in CI on every push. <b>Cost:</b> no licence fee and our own hardware; the running cost is electricity plus the minutes people spend answering step-ups, computed above from our own numbers and sourced figures. <b>Risk:</b> a measured rate of confirmation prompts, a two-week learning period, and the mimicry limit &mdash; all on this page.</p></div>
 </section>
 
 <section id="paper">
@@ -279,7 +314,9 @@
 <details><summary>What happens if it blocks something important?</summary><p>A step-up asks you to confirm the action; your answer lets it through and teaches the baseline. A block is raised with its reason, never silently. Money, deals and public claims already need your live approval of the exact words, so they are never left to behaviour alone. Any block is lifted by the offline recovery key.</p></details>
 <details><summary>What if I lose the offline recovery key?</summary><p>Pin a new one on the device itself, the same way it was pinned at install — never over the network. Until then nothing else changes: the daily key keeps working, and blocks can still be answered by confirming the action.</p></details>
 <details><summary>Holidays, time zones, a new project?</summary><p>A long quiet spell does not flag on its own: time gaps stop counting past about a day. A big change in how you work is held once for you to confirm, then learned.</p></details>
-<details><summary>What does it cost the machine?</summary><p>About a millisecond of CPU per action, measured live in this page when you grow the baselines; the cost case turns that into electricity at the chip&rsquo;s maximum draw.</p></details>
+<details><summary>What does it cost the machine?</summary><p>It is measured in your tab: press <b>Grow the baselines</b> and every synthetic action is timed &mdash; <span id="faq-ms">not measured yet</span>. The cost case turns that time into electricity at the chip&rsquo;s maximum draw.</p></details>
+<details><summary>What does it need to run, and how does it plug in?</summary><p>Node.js 22 or later on the machine it protects, or any modern browser &mdash; this page runs the same kernels in your tab. The repository declares no packages to install, the kernels make no network calls, and there is no cloud account. Each signed action goes through one door, <code>receive()</code> in <code>src/stack.mjs</code> (a LIGHT packet: layers 1 and 2, then BES, then immune memory). An existing system can call the watch directly: give <code>step()</code> in <code>src/watch.mjs</code> each action&rsquo;s shape &mdash; the time on your clock, the client, the kind of action, the project, its size, the permission tier &mdash; and pass its verdict to <code>trust()</code> in <code>src/trust.mjs</code>. Every verdict comes back with the row of the decision table that produced it.</p></details>
+<details><summary>Who is the supplier, and what are the terms?</summary><p>AI Native Solutions, through <a href="https://www.ai-nativesolutions.com">ai-nativesolutions.com</a>. Support, service levels, warranty and liability are agreed per deployment, in each deployment&rsquo;s agreement. The software is MIT-licensed with no licence fee and keeps running without the supplier.</p></details>
 </section>
 
 <footer>

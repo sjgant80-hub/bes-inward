@@ -8,7 +8,7 @@ import { trust } from '../src/trust.mjs';
 import { envelopeBody, materialOf, approvalMaterialOf, approvalFor, admits } from '../src/envelope.mjs';
 import { recoveryBody, recoveryMaterialOf, applyRecovery } from '../src/recovery.mjs';
 import { emptyNode, receive, sha256hex } from '../src/stack.mjs';
-import { costCase, pounds } from '../src/cost.mjs';
+import { costCase, measuredRates, pounds, BASIS_KEYS } from '../src/cost.mjs';
 import { makeIdentity, verifyBytes } from '../vendor/fall-kit-core/identity.mjs';
 import { prepare, finish, frame, KINDS } from '../vendor/fall-kit-core/vendor/light/packet.mjs';
 
@@ -30,7 +30,12 @@ $('theme').addEventListener('click', () => {
   try { localStorage.setItem('bes-theme', now); } catch { /* ignore */ }
 });
 
-const [PARAMS, CLAIMS, REAL, SYN, WIT, COSTS] = await Promise.all(['params.json', 'measure/claims.json', 'receipts/real.json', 'receipts/synthetic.json', 'receipts/witness.json', 'costs/sources.json'].map(getJSON));
+const [PARAMS, CLAIMS, REAL, SYN, WIT, COSTS, BASIS] = await Promise.all(['params.json', 'measure/claims.json', 'receipts/real.json', 'receipts/synthetic.json', 'receipts/witness.json', 'costs/sources.json', 'vendor/sovereign-enterprise/basis.json'].map(getJSON));
+const ISO = /\d{4}-\d{2}-\d{2}T[\d:.]+Z/;
+const TEST_FROM = CLAIMS && CLAIMS.data && CLAIMS.data.splits ? (String(CLAIMS.data.splits.test).match(ISO) || [null])[0] : null;
+const TEST_TO = REAL && REAL.provenance ? REAL.provenance.cutoff : null;
+const day = (iso, long) => { const d = new Date(iso); return Number.isFinite(d.getTime()) ? d.toLocaleDateString('en-GB', long ? { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' } : { day: 'numeric', month: 'short', timeZone: 'UTC' }) : '—'; };
+const n0 = (x) => (typeof x === 'number' ? x.toLocaleString('en-GB') : '—');
 const P = PARAMS && PARAMS.params ? PARAMS.params : {};
 
 // ── the strip and the results ──
@@ -70,9 +75,32 @@ const ORGANS = [
   ['src/cost.mjs', 'the cost case from your numbers and sourced prices'],
   ['measure/judge.mjs', 'the sealed claims, as a pure judge with the sealed bars'],
   ['src/bes.mjs', 'v1, the inward watch this layer grew from: op-mix and rhythm'],
+  ['src/synth.mjs', 'the seeded synthetic behaviour &mdash; the only behaviour this page and CI ever run', 'not mutated: test data, value-tested in drivers.test.mjs; any change breaks the byte-for-byte synthetic receipt check in CI'],
+  ['src/stream.mjs', 'v1&rsquo;s windowing glue', 'not mutated: glue, value-tested in stream.test.mjs'],
+  ['measure/harness.mjs · measure/measure.mjs', 'the measurement of the sealed claims, real (on the owner&rsquo;s machine) and synthetic', 'not mutated: orchestration, re-derived end to end in CI &mdash; measure.mjs --synthetic --check reproduces receipts/synthetic.json byte for byte'],
+  ['tools/', 'local only: extract the private streams, tune on dev data, run the live layer and its tiers, vendor, parse the witness receipt', 'not mutated: local I/O, never shipped to this page'],
+  ['vendor/', 'pinned byte-identical: LIGHT, the wallet and identity (fall-kit), immune and rebound (break-it), the cost basis (sovereign-enterprise)', 'gated in their own repositories; re-hashed against their pins in CI (tools/vendor.mjs --check)'],
+  ['page/app.mjs', 'this page: runs the kernels in your tab and reads every number from the committed receipts and sourced files', 'test/page.test.mjs: parses, every element it reaches exists, credits verbatim, no inline style, no money figure typed into the page'],
 ];
 const wk = (src) => (WIT && Array.isArray(WIT.kernels) ? WIT.kernels.find((k) => k.src === src) : null);
-$('bptbl').querySelector('tbody').innerHTML = ORGANS.map(([src, what]) => { const w = wk(src); return '<tr><td><code>' + src + '</code></td><td>' + what + '</td><td>' + (w ? '<span class="chip ' + (w.clean ? 'held' : 'failed') + '">' + (w.clean ? 'CLEAN' : 'NOT CLEAN') + '</span> ' + w.killed + '/' + w.total + (w.ignored ? ' · ' + w.ignored + ' argued equivalent' : '') : '<span class="note">gated in CI</span>') + '</td></tr>'; }).join('');
+$('bptbl').querySelector('tbody').innerHTML = ORGANS.map(([src, what, why]) => { const w = wk(src); return '<tr><td><code>' + src + '</code></td><td>' + what + '</td><td>' + (w ? '<span class="chip ' + (w.clean ? 'held' : 'failed') + '">' + (w.clean ? 'CLEAN' : 'NOT CLEAN') + '</span> ' + w.killed + '/' + w.total + (w.ignored ? ' · ' + w.ignored + ' argued equivalent' : '') : '<span class="note">' + (why || 'gated in CI') + '</span>') + '</td></tr>'; }).join('');
+
+// ── the real measurement, traced from its receipt ──
+if (REAL && REAL.facts && REAL.streams) {
+  const f = REAL.facts, st = REAL.streams;
+  const plural = (n, one, many) => n + ' ' + (n === 1 ? one : many);
+  for (const [k, name, x] of [['o', 'simon', f.B4 && f.B4.simon], ['s', 'kar-session', f.B5 && f.B5['kar-session']], ['n', 'kar-night', f.B5 && f.B5['kar-night']]]) {
+    const form = f.B7 && f.B7.formation ? f.B7.formation[name] : null;
+    if (!x || !form || !st[name]) continue;
+    $('r-' + k + '-1').textContent = n0(st[name].actions) + ' actions recorded';
+    $('r-' + k + '-2').textContent = 'first 14 days: ' + n0(form.actions) + ' actions · ' + form.enforcedNotAllow + ' enforced';
+    $('r-' + k + '-3t').textContent = 'test period, ' + day(TEST_FROM) + ' – ' + day(TEST_TO);
+    $('r-' + k + '-3').textContent = n0(st[name].test) + ' actions · ' + n0(x.forming) + ' still forming';
+    $('r-' + k + '-4a').textContent = n0(x.judged) + ' judged · ' + x.fp + ' stepped up or more';
+    $('r-' + k + '-4b').textContent = pct(x.fp, x.judged) + ' · asked ' + plural(x.episodes, 'time', 'times') + ' · ' + plural(x.shiftPrompts, 'big shift', 'big shifts') + ' confirmed';
+  }
+  if (f.B3 && f.B7 && f.B7.recovery) $('r-foot').textContent = 'Envelope faults blocked ' + f.B3.blocked + ' of ' + f.B3.total + ' · recovery cases passed ' + f.B7.recovery.passed + ' of ' + f.B7.recovery.total + ' · the stolen-key scripts, failures included, are in Results.';
+}
 
 // ── 1 · grow the baselines ──
 const START = Date.UTC(2026, 6, 20), DAYS = 42, END = START + DAYS * DAY;
@@ -107,6 +135,7 @@ async function grow() {
   $('growtbl').querySelector('tbody').innerHTML = rows.join('');
   $('steal').disabled = false;
   $('kstat').textContent = 'Kernels running in this tab · ' + total + ' synthetic actions judged at ' + msPerAction.toFixed(3) + ' ms each.';
+  $('faq-ms').textContent = 'just now, ' + n0(total) + ' synthetic actions took ' + msPerAction.toFixed(3) + ' ms each in this tab';
   await setupNode();
   drawCost();
 }
@@ -203,7 +232,7 @@ async function recover(kind) {
   if (kind === 'tamper') { const sig = await signHex(recKey, recoveryMaterialOf(body)); body = { ...body, at: body.at + 1 }; sigOk = await vHex(recKey.id, recoveryMaterialOf(body), sig); }
   const r = applyRecovery(locked, { body }, { recoveryKey: recKey.id, dailyKey: simon.id, sigOk, used, now: Date.now() });
   if (r.ok) { locked = r.w; used = r.used; lastRec = body; }
-  $('recout').innerHTML = recLine(r) + (r.ok ? '<br>held: ' + esc(String(r.w.held)) + ' · observe-only until ' + esc(new Date(r.w.observeUntil).toUTCString()) : '');
+  $('recout').innerHTML = recLine(r) + (r.ok ? '<br>' + (r.w.held ? 'still held at ' + esc(String(r.w.held.verdict || r.w.held)) : 'hold lifted') + ' · observe-only until ' + esc(new Date(r.w.observeUntil).toUTCString()) : '');
 }
 $('rec-ok').addEventListener('click', () => recover('ok'));
 $('rec-daily').addEventListener('click', () => recover('daily'));
@@ -231,7 +260,7 @@ async function deliver(label, bytes, at) {
   node = r.node;
   const o = r.out;
   const tr = document.createElement('tr');
-  tr.innerHTML = '<td>' + esc(label) + '</td><td>' + (o.admitted ? chip('ALLOW') : chip(o.enforced || 'BLOCK')) + '</td><td>' + esc(o.layer) + '</td><td>' + esc(o.why) + '</td><td>' + (o.immune ? esc(o.immune.family) + (o.immune.novel ? ' · new' : '') + ' · ' + esc(o.immune.standing) : '—') + '</td><td>' + (o.owed ? o.owed + ' bits' : '0') + '</td>';
+  tr.innerHTML = '<td>' + esc(label) + '</td><td>' + (o.admitted ? chip('ALLOW') : chip(o.enforced || 'BLOCK')) + '</td><td>' + esc(o.layer) + '</td><td>' + esc(o.why) + '</td><td>' + (o.immune ? esc(o.immune.family) + (o.immune.novel ? ' · a new antibody' : ' · seen before') + ' · source standing ' + esc(o.immune.standing) : '—') + '</td><td>' + (o.owed ? o.owed + ' bits' : '0') + '</td>';
   $('pkttbl').querySelector('tbody').prepend(tr);
   return r;
 }
@@ -247,15 +276,42 @@ $('p-thief').addEventListener('click', async () => {
   for (let i = 0; i < xs.length; i++) { clock += 60000; const r = await deliver('thief ' + (i + 1), await pkt(simon, asAction(xs[i])), clock); if (!r.out.admitted) break; }
 });
 
-// ── the cost case ──
+// ── the cost case ── every figure from the vendored basis or costs/sources.json, computed by src/cost.mjs
+const SRC = COSTS && Array.isArray(COSTS.sources) ? COSTS.sources : [];
+const srcOf = (key) => SRC.find((s) => s.key === key) || null;
+const usd = (cents) => 'US$' + (cents / 100).toFixed(2);
+const link = (s, text) => (s ? '<a href="' + esc(s.url) + '">' + text + '</a>' : text);
+const RATES = measuredRates(REAL, TEST_FROM, TEST_TO);
+if (RATES.ok) { $('c-sp').value = RATES.perPerson.toFixed(2); $('c-sa').value = RATES.perAgent.toFixed(2); }
+const times = (n) => (n === 1 ? 'once' : n + ' times');
+const field = (id) => ($(id).value === '' ? 0 : Number($(id).value));
 function drawCost() {
-  if (!COSTS) { $('c-lines').textContent = 'The sourced prices did not load.'; return; }
-  const realWeeks = 3;
-  const prompts = rf ? rf.episodes / realWeeks : 0;
-  const r = costCase({ people: Math.max(0, Math.floor(+$('c-people').value || 0)), agents: Math.max(0, Math.floor(+$('c-agents').value || 0)), actionsPerDay: Math.max(0, Math.floor(+$('c-actions').value || 0)), msPerAction, promptsPerWeek: prompts * Math.max(1, Math.floor(+$('c-people').value || 0)), minutesPerPrompt: Math.max(0, +$('c-min').value || 0) }, COSTS.prices);
-  if (!r.ok) { $('c-lines').textContent = r.why; return; }
-  $('c-rented').textContent = pounds(r.rented); $('c-bes').textContent = pounds(r.bes); $('c-save').textContent = pounds(r.saving);
-  $('c-lines').innerHTML = 'Rented: each person × US$10.00 a month × 12, at the Bank of England rate (agents are not counted on that side — their workload identities are priced separately — so it is understated). Ours: licence £0; electricity ' + pounds(r.lines.besPower) + ' for ' + r.lines.cpuHours.toFixed(3) + ' CPU-hours at the chip&rsquo;s 55 W maximum (' + msPerAction.toFixed(3) + ' ms an action, ' + (measured ? 'measured in this tab' : 'an estimate until you grow the baselines, then measured in this tab') + '); people&rsquo;s time ' + pounds(r.lines.besPeopleTime) + ' — ' + Math.round(r.lines.promptMinutes) + ' minutes a year answering step-ups at the National Living Wage, at the rate measured on the owner&rsquo;s real behaviour per person (' + prompts.toFixed(2) + ' a week). Sources: ' + COSTS.sources.map((s) => '<a href="' + esc(s.url) + '">' + esc(s.id) + '</a>').join(' · ') + '.';
+  const blank = () => { for (const k of ['c-rented', 'c-bes', 'c-save']) $(k).textContent = '—'; for (const k of ['c-rented-n', 'c-bes-n', 'c-save-n']) $(k).textContent = ''; };
+  if (!COSTS || !BASIS) { blank(); $('c-lines').textContent = 'The sourced figures did not load, so there is no case to show.'; return; }
+  const r = costCase(BASIS, COSTS.prices, { people: field('c-people'), agents: field('c-agents'), actionsPerDay: field('c-actions'), msPerAction, stepUpsPerPerson: field('c-sp'), stepUpsPerAgent: field('c-sa'), minutesPerStepUp: field('c-min'), years: field('c-years') });
+  if (!r.ok) { blank(); $('c-lines').textContent = 'Check the inputs: ' + r.why + '.'; return; }
+  const PR = COSTS.prices, B = BASIS, i = r.inputs, L = r.lines, yrs = i.years + (i.years === 1 ? ' year' : ' years');
+  $('c-rented').textContent = pounds(r.perYear.rented); $('c-bes').textContent = pounds(r.perYear.owned); $('c-save').textContent = pounds(r.differencePerYear);
+  $('c-rented-n').textContent = 'over ' + yrs + ': ' + pounds(r.over.rented);
+  $('c-bes-n').textContent = 'over ' + yrs + ': ' + pounds(r.over.owned);
+  $('c-save-n').textContent = 'over ' + yrs + ': ' + pounds(r.differenceOver);
+  $('c-lines').innerHTML = '<b>Rented:</b> ' + i.people + ' people × ' + usd(PR.entraP2CentsPerUserMonth) + ' a month (' + link(srcOf('entraP2CentsPerUserMonth'), 'Entra ID P2') + ') + ' + i.agents + ' agents × ' + usd(PR.workloadIdCentsPerIdentityMonth) + ' a month (' + link(srcOf('workloadIdCentsPerIdentityMonth'), 'Entra Workload ID') + '), × 12, at £' + B.fxGbpPerUsd.value + ' to the dollar = ' + pounds(L.rentedPeople) + ' + ' + pounds(L.rentedAgents) + '. '
+    + '<b>The BES layer:</b> no licence fee; electricity ' + pounds(L.power) + ' for ' + L.cpuHours.toFixed(3) + ' CPU-hours a year at the chip&rsquo;s ' + PR.chipMaxWatts + ' W maximum and ' + B.electricityPencePerKwh.value + 'p a kWh (' + msPerAction.toFixed(3) + ' ms an action, ' + (measured ? 'measured in this tab' : 'an estimate until you grow the baselines, then measured in this tab') + '); people&rsquo;s time ' + pounds(L.peopleTime) + ' for ' + Math.round(L.stepUps) + ' step-ups a year × ' + i.minutesPerStepUp + ' min at the UK median wage of £' + B.wageMedianHourly.value.toFixed(2) + ' an hour. Each later year rises by CPI, ' + (100 * B.cpi.value).toFixed(1) + '%. '
+    + (RATES.ok ? '<b>The step-up rates</b> start at what the real measurement saw over ' + RATES.weeks.toFixed(1) + ' weeks (' + day(TEST_FROM, true) + ' to ' + day(TEST_TO, true) + '): the owner was asked ' + times(Math.round(RATES.perPerson * RATES.weeks)) + ', ' + RATES.perPerson.toFixed(2) + ' a week; his agent ' + times(Math.round(RATES.perAgent * RATES.weeks)) + ', ' + RATES.perAgent.toFixed(2) + ' a week. One owner and one agent is a small sample: put in your own.' : 'The real receipt did not load; put in your own step-up rates.');
 }
-for (const k of ['c-people', 'c-agents', 'c-actions', 'c-min']) $(k).addEventListener('input', drawCost);
+const basisLine = (k) => { const b = BASIS && BASIS[k]; return b ? '<li>' + esc(b.what || b.product || k) + ' — <a href="' + esc(b.source) + '">source</a>' + (b.via ? ' (' + esc(b.via) + ')' : '') + '</li>' : ''; };
+$('c-src').innerHTML = (BASIS ? BASIS_KEYS.map(basisLine).join('') : '<li>the shared basis did not load</li>')
+  + SRC.filter((s) => ['entraP2CentsPerUserMonth', 'workloadIdCentsPerIdentityMonth', 'chipMaxWatts'].includes(s.key)).map((s) => '<li>' + esc(s.what) + ' — <a href="' + esc(s.url) + '">source</a>, read ' + esc(day(s.read, true)) + '</li>').join('')
+  + '<li>The wage, CPI, electricity and exchange rate are the estate&rsquo;s shared basis, <a href="https://github.com/sjgant80-hub/bes-inward/blob/main/vendor/sovereign-enterprise/basis.json">vendored byte for byte</a> and re-hashed in CI. None of this is a price for the BES layer.</li>';
+for (const k of ['c-people', 'c-agents', 'c-actions', 'c-sp', 'c-sa', 'c-min', 'c-years']) $(k).addEventListener('input', drawCost);
 drawCost();
+
+// ── against what you pay now: the sourced prices and statistics, rendered from costs/sources.json ──
+if (COSTS && COSTS.prices) {
+  const P2 = srcOf('entraP2CentsPerUserMonth'), WL = srcOf('workloadIdCentsPerIdentityMonth'), IBM = srcOf('breachUsd'), VZ = srcOf('vulnFirstPct');
+  const breach = 'US$' + (COSTS.prices.breachUsd / 1e6).toFixed(2) + ' million';
+  if (P2) $('p-p2').innerHTML = link(P2, esc(P2.product)) + ', which includes Microsoft Entra ID Protection and risk-based Conditional Access, at <b>' + usd(COSTS.prices.entraP2CentsPerUserMonth) + ' user/month, paid yearly</b> (its published price, read ' + esc(day(P2.read, true)) + ')';
+  if (WL) $('p-wl').innerHTML = link(WL, esc(WL.product)) + ' at <b>' + usd(COSTS.prices.workloadIdCentsPerIdentityMonth) + ' user/month, paid yearly</b>, as printed (read ' + esc(day(WL.read, true)) + ')';
+  if (IBM && VZ) $('p-why').innerHTML = 'Why it matters now: stolen passwords were the top way attackers got in until ' + link(VZ, 'Verizon&rsquo;s 2026 report') + ', where software vulnerabilities (' + COSTS.prices.vulnFirstPct + '%) moved ahead of them; the average breach cost ' + breach + ' in ' + link(IBM, 'IBM&rsquo;s Cost of a Data Breach Report 2026') + ', a record.';
+  if (IBM) $('b-breach').textContent = breach + ' (IBM, 2026)';
+}
