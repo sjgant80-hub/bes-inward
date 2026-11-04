@@ -180,7 +180,8 @@
 
 <section id="blueprint">
 <h2>Blueprint &mdash; organ by organ</h2>
-<p>Every decision kernel is pure (no clock, no network, no files), total (junk in is a refusal or a step-up, never a crash) and mutation-gated: each operator is flipped and the tests must fail. Counts are read from the witness receipt.</p>
+<p>Every decision kernel is pure (no clock, no network, no files), total (junk in is a refusal or a step-up, never a crash) and mutation-gated: each operator is flipped and the tests must fail. Counts are read from the witness receipt, parsed from the log of the CI run that produced it.</p>
+<p class="note" id="bp-run"></p>
 <div class="scroll"><table class="tbl" id="bptbl"><thead><tr><th>organ</th><th>what it does</th><th>witness</th></tr></thead><tbody></tbody></table></div>
 <p class="note">Vendored byte-identical and pinned (re-checked in CI): LIGHT&rsquo;s packet door, codec and SHA-256, the wallet kernel and the Ed25519 identity from <a href="https://github.com/sjgant80-hub/fall-kit">fall-kit</a> core; the immune system and the rebound tarpit from <a href="https://github.com/sjgant80-hub/break-it">break-it</a>; the estate&rsquo;s shared, sourced cost basis from <a href="https://github.com/sjgant80-hub/sovereign-enterprise">sovereign-enterprise</a>. The rows without a witness count are the parts the gate does not mutate, each with the reason the repository gives.</p>
 </section>
@@ -211,14 +212,14 @@
 <h3 id="roles">For each role</h3>
 <div class="cards">
   <div class="card"><h4>CEO</h4><p>A copied password or a leaked agent token no longer equals a breach. Your AI agent works inside limits you signed, and the big decisions &mdash; money, deals, public claims &mdash; still come to you, every time.</p></div>
-  <div class="card"><h4>CFO</h4><p>No licence fee (MIT). It runs on the machine you already have; its electricity rounds to nothing. The case below is computed from your numbers and published prices.</p></div>
+  <div class="card"><h4>CFO</h4><p>No licence fee (MIT). It runs on the machine you already have. What it really costs is people&rsquo;s time &mdash; the hours to set it up and the minutes to answer step-ups &mdash; and the case below counts both, with the electricity, from your numbers and published figures.</p></div>
   <div class="card"><h4>COO</h4><p>Nothing is blocked while it learns. Tiers switch on one at a time. Every strong verdict is raised with its reason, never silently. The offline key always brings you back.</p></div>
   <div class="card"><h4>CTO / CISO</h4><p>Four layers, verify-before-parse first. Behaviour judged on the receiver&rsquo;s clock in three entropy domains, per identity, with bars each identity learns from itself. Envelopes on Ed25519 and the wallet kernel. Mutation-gated kernels; sealed measurements with their failures published.</p></div>
   <div class="card"><h4>Your team</h4><p>If it really is you, one confirmation and you carry on &mdash; and it learns from your answer. It keeps the shape of what you do, never the words.</p></div>
 </div>
 
 <h3 id="cost">The cost case &mdash; your numbers</h3>
-<p class="note">Change any number. The case is computed in your tab by <code>src/cost.mjs</code> (mutation-gated, see the <a href="#blueprint">blueprint</a>) from your inputs and the sourced figures listed under it &mdash; nothing in it is typed into this page. The two step-up rates start at what the real measurement saw; put in your own.</p>
+<p class="note">Change any number. The case is computed in your tab by <code>src/cost.mjs</code> (mutation-gated, see the <a href="#blueprint">blueprint</a>) from your inputs and the sourced figures listed under it &mdash; nothing in it is typed into this page. The two step-up rates start at what the real measurement saw; put in your own. The set-up hours are yours too &mdash; the time your people spend installing it and running <a href="#adoption">the roll-out</a>; this page claims no figure for it, so the starting value is only a deliberately generous placeholder. They are charged once, to the first year of ours; the rented route&rsquo;s own set-up is not counted, so the comparison never flatters this layer. The layer is measured for one owner and one agent (see <a href="#risks">the risks</a>); each extra person or agent gets a watch of its own.</p>
 <div class="panel">
   <div class="row">
     <label>People holding keys<input id="c-people" type="number" min="0" step="1" value="10"></label>
@@ -227,6 +228,7 @@
     <label>Step-ups a week, each person<input id="c-sp" type="number" min="0" step="0.01" value="0"></label>
     <label>Step-ups a week, each agent<input id="c-sa" type="number" min="0" step="0.01" value="0"></label>
     <label>Minutes to answer one<input id="c-min" type="number" min="0" step="0.5" value="1"></label>
+    <label>Hours to install and roll out, once (your estimate)<input id="c-setup" type="number" min="0" step="1" value="40"></label>
     <label>Years<input id="c-years" type="number" min="1" max="10" step="1" value="3"></label>
   </div>
   <div class="grid three gap-top">
@@ -257,7 +259,8 @@
   <li><b>Supplier:</b> <a href="https://www.ai-nativesolutions.com">AI Native Solutions</a>. To start, or to scope a deployment, contact them through that site.</li>
   <li><b>Support, service levels, warranty and liability</b> are agreed per deployment, in each deployment&rsquo;s agreement.</li>
   <li><b>Ownership:</b> MIT-licensed, no licence fee. You hold the source, the keys and the baselines. It runs on your machine and keeps running without us.</li>
-  <li><b>What is inside:</b> no npm packages. The only code from outside this repository is vendored byte for byte, pinned and re-hashed in CI, from the estate&rsquo;s own MIT-licensed repositories (fall-kit, break-it, sovereign-enterprise); the mutation gate is witness v0.6, also MIT.</li>
+  <li><b>What is inside:</b> no npm packages. The only code from outside this repository is vendored byte for byte, pinned and re-hashed in CI, from the estate&rsquo;s own MIT-licensed repositories (fall-kit, break-it, sovereign-enterprise); every vendored file, its source commit and its SHA-256 are listed in <a href="https://github.com/sjgant80-hub/bes-inward/blob/main/vendor/SOURCES.json">vendor/SOURCES.json</a>. The mutation gate is witness v0.6, also MIT.</li>
+  <li><b>Method licences:</b> Gary W. Floyd&rsquo;s two papers are published as open defensive prior art &mdash; the security paper under CC BY 4.0, the alignment paper under the MIT License &mdash; and both are credited in full in the footer.</li>
   <li><b>Exit:</b> nothing to cancel and nothing to migrate out of a vendor&rsquo;s cloud. The baselines are files on your device, in LIGHT, and <code>src/store.mjs</code> reads them back to plain data. Stop running it and nothing else changes: your signatures, counters and existing security keep working.</li>
 </ul>
 
@@ -268,11 +271,12 @@
   <tr><th>A perfect copy of your own past behaviour.</th><td>A thief who replays your exact past week, rhythm and all, is the hardest case &mdash; Gary W. Floyd&rsquo;s own paper says behaviour alone does not stop mimicry. We sealed that as a predicted limit (L1) and measured it; the result is in Results.</td></tr>
   <tr><th>The first two weeks.</th><td>While it learns it enforces nothing. The other layers (signatures, counters, the LIGHT barrier) still refuse forgeries from the first second.</td></tr>
   <tr><th>Someone at your actual keyboard.</th><td>Physical compromise of the device is out of scope. So is replacing encryption, patching or verify-before-parse &mdash; BES complements them.</td></tr>
+  <tr><th>Who has checked it.</th><td>GitHub&rsquo;s runner re-runs every test, the mutation gate on every kernel and the synthetic measurement on every push, and anyone can repeat them from the source. No independent penetration test is published in this repository; if your policy needs one, scope it in the deployment agreement.</td></tr>
   <tr><th>Many people, many agents.</th><td>It is measured for one owner and one agent. More identities each get their own watch; arbitration between many is Gary&rsquo;s listed future work, not this build&rsquo;s claim.</td></tr>
 </tbody></table></div>
 
 <h3 id="board">The case for the board</h3>
-<div class="rule"><p><b>Problem:</b> every security layer we had trusts a valid key; stolen credentials were the leading way in until this year, and a breach averages <span id="b-breach">a record sum (IBM, 2026)</span>. <b>Answer:</b> a fourth layer that makes a valid key insufficient on its own &mdash; behaviour must match, and the AI agent is bound to signed limits with the big decisions reserved to the owner. <b>Evidence:</b> measured on our own real behaviour against claims sealed before the code, failures published; kernels mutation-gated; the synthetic mirror re-run in CI on every push. <b>Cost:</b> no licence fee and our own hardware; the running cost is electricity plus the minutes people spend answering step-ups, computed above from our own numbers and sourced figures. <b>Risk:</b> a measured rate of confirmation prompts, a two-week learning period, and the mimicry limit &mdash; all on this page.</p></div>
+<div class="rule"><p><b>Problem:</b> every security layer we had trusts a valid key; stolen credentials were the leading way in until this year, and a breach averages <span id="b-breach">a record sum (IBM, 2026)</span>. <b>Answer:</b> a fourth layer that makes a valid key insufficient on its own &mdash; behaviour must match, and the AI agent is bound to signed limits with the big decisions reserved to the owner. <b>Evidence:</b> measured on our own real behaviour against claims sealed before the code, failures published; kernels mutation-gated; the synthetic mirror re-run in CI on every push. <b>Cost:</b> no licence fee and our own hardware; the cost is the hours to set it up once, then electricity plus the minutes people spend answering step-ups, computed above from our own numbers and sourced figures. <b>Risk:</b> a measured rate of confirmation prompts, a two-week learning period, and the mimicry limit &mdash; all on this page.</p></div>
 </section>
 
 <section id="paper">
@@ -312,6 +316,7 @@
 <details><summary>Do I need a cloud account?</summary><p>No. It runs on the machine it protects.</p></details>
 <details><summary>Does it replace MFA or my other security?</summary><p>No. It sits after them: signatures, counters and the LIGHT barrier run first, and anything you already use (MFA, encryption, patching) stays. BES adds the one check they cannot make — whether a valid key is behaving like its holder.</p></details>
 <details><summary>What happens if it blocks something important?</summary><p>A step-up asks you to confirm the action; your answer lets it through and teaches the baseline. A block is raised with its reason, never silently. Money, deals and public claims already need your live approval of the exact words, so they are never left to behaviour alone. Any block is lifted by the offline recovery key.</p></details>
+<details><summary>Who answers a step-up when I am away?</summary><p>Nothing answers it for you: a stepped-up action is not admitted until it is confirmed, so it waits &mdash; and for the agent, that piece of work waits too. THROTTLE, the first tier, admits odd actions and flags them; STEP_UP and above hold them. The tiers are yours to switch on, one at a time, so if you are often away, run on THROTTLE until you can answer.</p></details>
 <details><summary>What if I lose the offline recovery key?</summary><p>Pin a new one on the device itself, the same way it was pinned at install — never over the network. Until then nothing else changes: the daily key keeps working, and blocks can still be answered by confirming the action.</p></details>
 <details><summary>Holidays, time zones, a new project?</summary><p>A long quiet spell does not flag on its own: time gaps stop counting past about a day. A big change in how you work is held once for you to confirm, then learned.</p></details>
 <details><summary>What does it cost the machine?</summary><p>It is measured in your tab: press <b>Grow the baselines</b> and every synthetic action is timed &mdash; <span id="faq-ms">not measured yet</span>. The cost case turns that time into electricity at the chip&rsquo;s maximum draw.</p></details>

@@ -11,16 +11,19 @@
 //            the rented route (Microsoft Entra ID P2 for each person, Microsoft Entra Workload ID for each AI agent)
 //            and the chip's maximum draw.
 //
-//   costCase(basis, prices, input) → { ok, inputs, perYear: { rented, owned }, lines, over: { rented, owned },
+//   costCase(basis, prices, input) → { ok, inputs, perYear: { rented, owned } (running costs), lines, over: { rented, owned },
 //                                      differencePerYear, differenceOver } | { ok: false, why }
 //   input = { people, agents, actionsPerDay (all keys together), msPerAction (the watch's measured CPU time per action),
-//             stepUpsPerPerson, stepUpsPerAgent (a week each, answered by a person), minutesPerStepUp, years (1 to 10) }
+//             stepUpsPerPerson, stepUpsPerAgent (a week each, answered by a person), minutesPerStepUp,
+//             setupHours (the reader's own estimate of the hours to install and roll it out, once), years (1 to 10) }
 //
 // Money is whole pence (integers). Floors on the rented side, never top ends on ours:
 //   rented a year = (people × the P2 price + agents × the Workload ID price) × 12, US cents × £ per $ = pence, rounded
 //   owned a year  = electricity: CPU-hours × the chip's MAXIMUM draw × business pence per kWh, rounded UP
 //                 + people's time: every step-up a week × 52 × minutes, at the UK median hourly wage, rounded UP
 //                 + licence 0
+//   set-up, once  = setupHours at the UK median hourly wage, rounded UP, added to the first year of ours only (the
+//                   rented route's own set-up is not counted, so the comparison never flatters ours)
 //   over `years`: each later year rises by CPI (the basis's own rule), each year's pence rounded the same way.
 //
 //   measuredRates(receipt, fromIso, toIso) → { ok, weeks, perPerson, perAgent } — the step-up rates the real
@@ -58,7 +61,7 @@ export function costCase(basis, prices, input) {
     if (!got.f) return { ok: false, why: got.why };
     const f = got.f, i = isObj(input) ? input : {};
     for (const k of ['people', 'agents', 'actionsPerDay']) if (!whole(i[k])) return { ok: false, why: k + ' is a whole number' };
-    for (const k of ['msPerAction', 'stepUpsPerPerson', 'stepUpsPerAgent', 'minutesPerStepUp']) if (!fin(i[k])) return { ok: false, why: k + ' is a number ≥ 0' };
+    for (const k of ['msPerAction', 'stepUpsPerPerson', 'stepUpsPerAgent', 'minutesPerStepUp', 'setupHours']) if (!fin(i[k])) return { ok: false, why: k + ' is a number ≥ 0' };
     if (!Number.isInteger(i.years) || i.years < 1 || i.years > 10) return { ok: false, why: 'years is a whole number from 1 to 10' };
     const cents = (i.people * f.p2 + i.agents * f.wl) * 12;
     const rented = Math.round(cents * f.fx);                                           // US cents × £ per $ = pence
@@ -69,12 +72,13 @@ export function costCase(basis, prices, input) {
     const minutes = stepUps * i.minutesPerStepUp;
     const peopleTime = Math.ceil((minutes * f.wagePence) / 60);
     const owned = power + peopleTime;
-    const total = { rented: over(rented, f.cpi, i.years, false), owned: over(owned, f.cpi, i.years, true) };
+    const setup = Math.ceil(i.setupHours * f.wagePence);                                // once, in the first year
+    const total = { rented: over(rented, f.cpi, i.years, false), owned: over(owned, f.cpi, i.years, true) + setup };
     return {
       ok: true,
-      inputs: { people: i.people, agents: i.agents, actionsPerDay: i.actionsPerDay, msPerAction: i.msPerAction, stepUpsPerPerson: i.stepUpsPerPerson, stepUpsPerAgent: i.stepUpsPerAgent, minutesPerStepUp: i.minutesPerStepUp, years: i.years },
+      inputs: { people: i.people, agents: i.agents, actionsPerDay: i.actionsPerDay, msPerAction: i.msPerAction, stepUpsPerPerson: i.stepUpsPerPerson, stepUpsPerAgent: i.stepUpsPerAgent, minutesPerStepUp: i.minutesPerStepUp, setupHours: i.setupHours, years: i.years },
       perYear: { rented, owned },
-      lines: { rentedPeople: Math.round(i.people * f.p2 * 12 * f.fx), rentedAgents: Math.round(i.agents * f.wl * 12 * f.fx), licence: 0, power, peopleTime, cpuHours, kWh, stepUps, minutes },
+      lines: { rentedPeople: Math.round(i.people * f.p2 * 12 * f.fx), rentedAgents: Math.round(i.agents * f.wl * 12 * f.fx), licence: 0, power, peopleTime, setup, cpuHours, kWh, stepUps, minutes },
       over: total,
       differencePerYear: rented - owned,
       differenceOver: total.rented - total.owned,

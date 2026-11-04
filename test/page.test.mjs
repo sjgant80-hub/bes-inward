@@ -66,6 +66,17 @@ test('every sourced figure the page renders has a primary source and the date it
   assert.match(app, /vendor\/sovereign-enterprise\/basis\.json/);
 });
 
+test('every input of the cost case reaches the kernel and redraws it', () => {
+  const call = app.slice(app.indexOf('const r = costCase('), app.indexOf('if (!r.ok) { blank()'));
+  const ins = [...html.slice(html.indexOf('<h3 id="cost">'), html.indexOf('<h3 id="compare">')).matchAll(/<input id="([^"]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(ins, ['c-people', 'c-agents', 'c-actions', 'c-sp', 'c-sa', 'c-min', 'c-setup', 'c-years']);
+  for (const id of ins) assert.ok(call.includes("field('" + id + "')"), id + ' reaches costCase');
+  const redraw = app.match(/for \(const k of (\[[^\]]+\])\) \$\(k\)\.addEventListener\('input', drawCost\)/);
+  assert.ok(redraw, 'the inputs redraw the case');
+  assert.deepEqual(JSON.parse(redraw[1].replace(/'/g, '"')), ins);
+  assert.match(text, /set-up hours are yours/);
+});
+
 test('the supplier, the terms and the exit are on the page', () => {
   assert.match(text, /contact them through that site/);
   assert.match(text, /Support, service levels, warranty and liability\s+are agreed per deployment/);
