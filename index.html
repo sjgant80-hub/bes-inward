@@ -37,7 +37,7 @@
   <li>Pick <b>whose key is stolen</b> and <b>how the thief drives it</b>, then press <b>Hand the key to a script</b>. Each of ten actions gets a verdict and the reason.</li>
   <li>Make the agent act <b>outside its envelope</b> &mdash; pick a fault and see which check stops it.</li>
   <li><b>Lock yourself out, then recover</b> with the offline key. Try the daily key and a replay too.</li>
-  <li>Send <b>one packet through all four layers</b> and see which layer decided, what the immune system learned, and what the tarpit now charges.</li>
+  <li>Send <b>one packet through all four layers</b> and see which layer decided and what the immune system learned; then press <b>A source that keeps attacking</b> and watch the tarpit start to charge it.</li>
   <li>Read <a href="#how">How it works</a> &mdash; the diagram fills in with the numbers of your last run, and a second one traces what the real measurement did.</li>
   <li>Put your own numbers into <a href="#cost">the cost case</a> in the brochure &mdash; people, agents, actions a day &mdash; and read where every figure comes from.</li>
 </ol>
@@ -111,15 +111,17 @@
 
 <div class="panel">
   <h3>5 · One packet through all four layers</h3>
-  <p class="note">A real LIGHT packet, signed in this tab, through the same door the estate&rsquo;s nodes use. Layers 1 and 2 are checked on raw bytes before a byte of the body is decoded; BES judges the decoded action on the receiver&rsquo;s clock; every refusal becomes immune memory, and a source refused too often owes proof-of-work before it is looked at again.</p>
+  <p class="note">A real LIGHT packet, signed in this tab, through the same door the estate&rsquo;s nodes use. Layers 1 and 2 are checked on raw bytes before a byte of the body is decoded; BES judges the decoded action on the receiver&rsquo;s clock; every refusal becomes immune memory, and a source refused too often owes proof-of-work before it is looked at again. <span id="pkt-ladder"></span> A few refusals cost a source nothing, so the tarpit column stays at 0 until you press <b>A source that keeps attacking</b>.</p>
   <div class="btns">
     <button id="p-good" type="button">The owner, genuine</button>
     <button id="p-forged" type="button">A forged signature</button>
     <button id="p-foreign" type="button">Not LIGHT at all</button>
     <button id="p-replay" type="button">A replayed packet</button>
     <button id="p-thief" type="button">The real key, a script driving it</button>
+    <button id="p-flood" type="button">A source that keeps attacking</button>
   </div>
   <div class="scroll"><table class="tbl" id="pkttbl"><thead><tr><th>packet</th><th>admitted</th><th>layer that decided</th><th>why</th><th>immune memory</th><th>tarpit owed</th></tr></thead><tbody></tbody></table></div>
+  <p class="note" id="pktsum"></p>
 </div>
 </section>
 
@@ -219,7 +221,7 @@
 </div>
 
 <h3 id="cost">The cost case &mdash; your numbers</h3>
-<p class="note">Change any number. The case is computed in your tab by <code>src/cost.mjs</code> (mutation-gated, see the <a href="#blueprint">blueprint</a>) from your inputs and the sourced figures listed under it &mdash; nothing in it is typed into this page. The two step-up rates start at what the real measurement saw; put in your own. The set-up hours are yours too &mdash; the time your people spend installing it and running <a href="#adoption">the roll-out</a>; this page claims no figure for it, so the starting value is only a deliberately generous placeholder. They are charged once, to the first year of ours; the rented route&rsquo;s own set-up is not counted, so the comparison never flatters this layer. The layer is measured for one owner and one agent (see <a href="#risks">the risks</a>); each extra person or agent gets a watch of its own.</p>
+<p class="note">Change any number. The case is computed in your tab by <code>src/cost.mjs</code> (mutation-gated, see the <a href="#blueprint">blueprint</a>) from your inputs and the sourced figures listed under it &mdash; nothing in it is typed into this page. The two step-up rates start at what the real measurement saw; put in your own. The set-up hours are yours too &mdash; the time your people spend installing it and running <a href="#adoption">the roll-out</a>; this page claims no figure for it, so the starting value is only a deliberately generous placeholder. They are charged once, to the first year of ours; the rented route&rsquo;s own set-up is not counted, so the comparison never flatters this layer. People, agents and actions a day start at placeholders: put in yours. The layer is measured for one owner and one agent (see <a href="#risks">the risks</a>); each extra person or agent gets a watch of its own.</p>
 <div class="panel">
   <div class="row">
     <label>People holding keys<input id="c-people" type="number" min="0" step="1" value="10"></label>
@@ -232,9 +234,9 @@
     <label>Years<input id="c-years" type="number" min="1" max="10" step="1" value="3"></label>
   </div>
   <div class="grid three gap-top">
-    <div><div class="note">the rented route, a year</div><div class="money" id="c-rented">—</div><div class="note" id="c-rented-n"></div></div>
-    <div><div class="note">the BES layer, a year (MIT, no licence fee)</div><div class="money" id="c-bes">—</div><div class="note" id="c-bes-n"></div></div>
-    <div><div class="note">the difference, a year</div><div class="money" id="c-save">—</div><div class="note" id="c-save-n"></div></div>
+    <div><div class="note">the rented route, each year</div><div class="money" id="c-rented">—</div><div class="note" id="c-rented-n"></div></div>
+    <div><div class="note">the BES layer, each year after set-up (MIT, no licence fee)</div><div class="money" id="c-bes">—</div><div class="note" id="c-bes-n"></div></div>
+    <div><div class="note">the difference, each year after set-up</div><div class="money" id="c-save">—</div><div class="note" id="c-save-n"></div></div>
   </div>
   <p class="note" id="c-lines"></p>
   <h4>Where every figure comes from</h4>
@@ -251,6 +253,7 @@
   <li><b>Where the data lives:</b> behavioural baselines are kept in LIGHT on the device they protect. They are not uploaded, not synced, not in any repository. This public page and its CI run on synthetic behaviour only; the real measurement publishes counts and rates and the SHA-256 of each private input, nothing else.</li>
   <li><b>UK GDPR:</b> behaviour about a person is personal data. BES processes it on that person&rsquo;s own device, for the security of their own system (Article 32, security of processing) &mdash; no processor, no transfer, nothing to a third country. If you use it to watch staff, tell them first, as the ICO&rsquo;s guidance on monitoring workers expects.</li>
   <li><b>What it keeps:</b> the shape of actions &mdash; time, kind, project, size, permission tier. Never the text of a message or a command.</li>
+  <li id="sec-bounded"><b>How much it keeps:</b> a bounded watch per identity, not a log (the bounds load from the frozen parameters).</li>
   <li><b>Audit:</b> every verdict carries the row of the decision table that produced it and the part it was measured on.</li>
 </ul>
 

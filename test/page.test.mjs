@@ -84,6 +84,24 @@ test('the supplier, the terms and the exit are on the page', () => {
   assert.match(text, /Exit:/);
 });
 
+test('the tarpit is shown for real: the flood runs the vendored rebound ladder and pays its work, nothing typed', () => {
+  assert.ok(ids.includes('p-flood') && ids.includes('pkt-ladder') && ids.includes('pktsum'));
+  assert.match(app, /\$\('p-flood'\)\.addEventListener\('click'/);
+  assert.match(app, /difficultyFor\(/);
+  assert.match(app, /REBOUND_LADDER\.BLOCK/);
+  assert.match(app, /solve\(owes\.out\.challenge, owes\.out\.owed, sha256hex\)/);
+  const demo = html.slice(html.indexOf('<section id="demo">'), html.indexOf('<section id="how">')).replace(/<[^>]+>/g, ' ');
+  assert.doesNotMatch(demo, /\d+\s+bits|refused \d+ times/);
+});
+
+test('what the watch keeps is stated from the frozen params, not typed', () => {
+  assert.ok(ids.includes('sec-bounded'));
+  assert.match(app, /const PW = paramsOf\(P\)/);
+  assert.match(app, /PW\.W/);
+  assert.match(app, /PW\.maxQuar/);
+  assert.match(app, /PW\.maxCal/);
+});
+
 test('no inline style attribute: the CSP (style-src self) would block it', () => {
   assert.doesNotMatch(html, /\sstyle="/);
   assert.doesNotMatch(app, /setAttribute\('style'/);

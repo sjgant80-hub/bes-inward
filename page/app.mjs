@@ -1,7 +1,8 @@
 // page/app.mjs — the live page. Every demo runs the real kernels in this tab on SYNTHETIC behaviour; every result
 // number is read from a committed receipt at load. Nothing real is on this page.
 import { human, night, session } from '../src/synth.mjs';
-import { emptyWatcher, step, confirm, confirmShift } from '../src/watch.mjs';
+import { emptyWatcher, step, confirm, confirmShift, paramsOf } from '../src/watch.mjs';
+import { REBOUND_LADDER, BITS, difficultyFor, solve } from '../vendor/break-it/rebound.mjs';
 import { run, cadence, burst, uniform, shuffled, borrowed, mimic, DAY } from '../src/drivers.mjs';
 import { rank } from '../src/gep.mjs';
 import { trust } from '../src/trust.mjs';
@@ -256,17 +257,19 @@ async function pkt(who, value) {
   const p = prepare({ sender: who.slot, counter, dictId: 0, kind: KINDS.JSON, value });
   return finish(p.unsigned, await who.sign(p.signed)).bytes;
 }
-async function deliver(label, bytes, at) {
-  if (!node) await setupNode();
-  const f = frame(bytes, {});
-  const key = f.ok && node.keys[f.sender] ? node.keys[f.sender].id : null;
-  const ok = key ? await verifyBytes(key, f.signed, f.sig) : false;
-  const r = receive(node, bytes, { now: at, source: label === 'replay' ? 'lan' : label.startsWith('thief') ? 'far-host' : 'lan', verify: () => ok });
-  node = r.node;
-  const o = r.out;
+function showPacket(label, o) {
   const tr = document.createElement('tr');
   tr.innerHTML = '<td>' + esc(label) + '</td><td>' + (o.admitted ? chip('ALLOW') : chip(o.enforced || 'BLOCK')) + '</td><td>' + esc(o.layer) + '</td><td>' + esc(o.why) + '</td><td>' + (o.immune ? esc(o.immune.family) + (o.immune.novel ? ' · a new antibody' : ' · seen before') + ' · source standing ' + esc(o.immune.standing) : '—') + '</td><td>' + (o.owed ? o.owed + ' bits' : '0') + '</td>';
   $('pkttbl').querySelector('tbody').prepend(tr);
+}
+const verified = async (bytes) => { const f = frame(bytes, {}); const key = f.ok && node.keys[f.sender] ? node.keys[f.sender].id : null; return key ? await verifyBytes(key, f.signed, f.sig) : false; };
+async function deliver(label, bytes, at, io) {
+  if (!node) await setupNode();
+  const ok = await verified(bytes);
+  const source = io && io.source ? io.source : label === 'replay' ? 'lan' : label.startsWith('thief') ? 'far-host' : 'lan';
+  const r = receive(node, bytes, { now: at, source, verify: () => ok, work: io ? io.work : undefined });
+  node = r.node;
+  showPacket(label, r.out);
   return r;
 }
 const ownShape = () => { const xs = (S.simon || human({ seed: 7, start: START, days: DAYS })).filter((e) => e.t >= END - 7 * DAY); return xs[Math.floor(xs.length / 2)]; };
@@ -279,6 +282,30 @@ $('p-thief').addEventListener('click', async () => {
   if (!W.simon) { $('kstat').textContent = 'Grow the baselines first, so the owner&rsquo;s watch knows him.'.replace('&rsquo;', '’'); return; }
   const xs = S.simon.filter((e) => e.t >= END - 14 * DAY).slice(-10);
   for (let i = 0; i < xs.length; i++) { clock += 60000; const r = await deliver('thief ' + (i + 1), await pkt(simon, asAction(xs[i])), clock); if (!r.out.admitted) break; }
+});
+// The tarpit, shown for real: one source sends the same forged packet until break-it's rebound ladder says it owes
+// work, then pays that work in this tab to buy one more look. Every number is read from the vendored kernel.
+$('pkt-ladder').textContent = 'A source refused ' + REBOUND_LADDER.BLOCK + ' times owes ' + BITS.BLOCK + ' bits of proof-of-work before its next packet is looked at, and ' + BITS.ISOLATE + ' bits past ' + REBOUND_LADDER.ISOLATE + ' refusals; the node spends one hash to check a token.';
+let floods = 0;
+$('p-flood').addEventListener('click', async () => {
+  if (!node) await setupNode();
+  $('p-flood').disabled = true;
+  try {
+    floods += 1;
+    const source = 'flood-host-' + floods, b = (await pkt(simon, asAction(ownShape()))).slice();
+    b[b.length - 1] ^= 1;
+    const ok = await verified(b);
+    let r = null, n = 0;
+    while (difficultyFor((node.refusals && node.refusals[source]) || 0) === 0 && n < REBOUND_LADDER.ISOLATE) { r = receive(node, b, { now: clock, source, verify: () => ok }); node = r.node; n += 1; }
+    if (!r) return;
+    showPacket('the same forged packet × ' + n, r.out);
+    const owes = await deliver('packet ' + (n + 1) + ', no work', b, clock, { source });
+    const t0 = performance.now();
+    const work = solve(owes.out.challenge, owes.out.owed, sha256hex);
+    const ms = performance.now() - t0;
+    const paid = await deliver('packet ' + (n + 1) + ', work paid', b, clock, { source, work });
+    $('pktsum').innerHTML = n + ' forged packets from one source were each refused at ' + esc(r.out.layer) + '; after the last, the tarpit asked ' + r.out.owed + ' bits of work. Packet ' + (n + 1) + ' without that work was refused before its signature was checked. This tab then paid the work (' + ms.toFixed(0) + ' ms on its side) and the node looked once more: refused again at ' + esc(paid.out.layer) + ' &mdash; the work buys a look, never admission. Nothing was sent back at the source.';
+  } finally { $('p-flood').disabled = false; }
 });
 
 // ── the cost case ── every figure from the vendored basis or costs/sources.json, computed by src/cost.mjs
@@ -298,10 +325,11 @@ function drawCost() {
   const PR = COSTS.prices, B = BASIS, i = r.inputs, L = r.lines, yrs = i.years + (i.years === 1 ? ' year' : ' years');
   $('c-rented').textContent = pounds(r.perYear.rented); $('c-bes').textContent = pounds(r.perYear.owned); $('c-save').textContent = pounds(r.differencePerYear);
   $('c-rented-n').textContent = 'over ' + yrs + ': ' + pounds(r.over.rented);
-  $('c-bes-n').textContent = 'over ' + yrs + ': ' + pounds(r.over.owned) + (L.setup ? ', including ' + pounds(L.setup) + ' of set-up, once' : '');
-  $('c-save-n').textContent = 'over ' + yrs + ': ' + pounds(r.differenceOver);
-  $('c-lines').innerHTML = '<b>Rented:</b> ' + i.people + ' people × ' + usd(PR.entraP2CentsPerUserMonth) + ' a month (' + link(srcOf('entraP2CentsPerUserMonth'), 'Entra ID P2') + ') + ' + i.agents + ' agents × ' + usd(PR.workloadIdCentsPerIdentityMonth) + ' a month (' + link(srcOf('workloadIdCentsPerIdentityMonth'), 'Entra Workload ID') + '), × 12, at £' + B.fxGbpPerUsd.value + ' to the dollar = ' + pounds(L.rentedPeople) + ' + ' + pounds(L.rentedAgents) + '. '
-    + '<b>The BES layer:</b> no licence fee; electricity ' + pounds(L.power) + ' for ' + L.cpuHours.toFixed(3) + ' CPU-hours a year at the chip&rsquo;s ' + PR.chipMaxWatts + ' W maximum and ' + B.electricityPencePerKwh.value + 'p a kWh (' + msPerAction.toFixed(3) + ' ms an action, ' + (measured ? 'measured in this tab' : 'an estimate until you grow the baselines, then measured in this tab') + '); people&rsquo;s time ' + pounds(L.peopleTime) + ' for ' + Math.round(L.stepUps) + ' step-ups a year × ' + i.minutesPerStepUp + ' min at the UK median wage of £' + B.wageMedianHourly.value.toFixed(2) + ' an hour. <b>Set-up, once:</b> ' + i.setupHours + ' hours at the same wage = ' + pounds(L.setup) + ', in the first year of ours only. Each later year rises by CPI, ' + (100 * B.cpi.value).toFixed(1) + '%. '
+  $('c-bes-n').textContent = 'over ' + yrs + ', set-up included: ' + pounds(r.over.owned) + (L.setup ? ' (' + pounds(L.setup) + ' of it is the set-up, once)' : '');
+  $('c-save-n').textContent = 'over ' + yrs + ', set-up included: ' + pounds(r.differenceOver);
+  const many = (n, one, more) => n + ' ' + (n === 1 ? one : more);
+  $('c-lines').innerHTML = '<b>Rented:</b> ' + many(i.people, 'person', 'people') + ' × '+ usd(PR.entraP2CentsPerUserMonth) + ' a month (' + link(srcOf('entraP2CentsPerUserMonth'), 'Entra ID P2') + ') + ' + many(i.agents, 'agent', 'agents') + ' × ' + usd(PR.workloadIdCentsPerIdentityMonth) + ' a month (' + link(srcOf('workloadIdCentsPerIdentityMonth'), 'Entra Workload ID') + '), × 12, at £' + B.fxGbpPerUsd.value + ' to the dollar = ' + pounds(L.rentedPeople) + ' + ' + pounds(L.rentedAgents) + '. '
+    + '<b>The BES layer:</b> no licence fee; electricity ' + pounds(L.power) + ' for ' + L.cpuHours.toFixed(3) + ' CPU-hours a year at the chip&rsquo;s ' + PR.chipMaxWatts + ' W maximum and ' + B.electricityPencePerKwh.value + 'p a kWh (' + msPerAction.toFixed(3) + ' ms an action, ' + (measured ? 'measured in this tab' : 'an estimate until you grow the baselines, then measured in this tab') + '); people&rsquo;s time ' + pounds(L.peopleTime) + ' for ' + many(Math.round(L.stepUps), 'step-up', 'step-ups') + ' a year × ' + i.minutesPerStepUp + ' min at the UK median wage of £' + B.wageMedianHourly.value.toFixed(2) + ' an hour. <b>Set-up, once:</b> ' + i.setupHours + ' hours at the same wage = ' + pounds(L.setup) + ', in the first year of ours only. Each later year rises by CPI, ' + (100 * B.cpi.value).toFixed(1) + '%. '
     + (RATES.ok ? '<b>The step-up rates</b> start at what the real measurement saw over ' + RATES.weeks.toFixed(1) + ' weeks (' + day(TEST_FROM, true) + ' to ' + day(TEST_TO, true) + '): the owner was asked ' + times(Math.round(RATES.perPerson * RATES.weeks)) + ', ' + RATES.perPerson.toFixed(2) + ' a week; his agent ' + times(Math.round(RATES.perAgent * RATES.weeks)) + ', ' + RATES.perAgent.toFixed(2) + ' a week. One owner and one agent is a small sample: put in your own.' : 'The real receipt did not load; put in your own step-up rates.');
 }
 const basisLine = (k) => { const b = BASIS && BASIS[k]; return b ? '<li>' + esc(b.what || b.product || k) + ' — <a href="' + esc(b.source) + '">source</a>' + (b.via ? ' (' + esc(b.via) + ')' : '') + '</li>' : ''; };
@@ -320,3 +348,7 @@ if (COSTS && COSTS.prices) {
   if (IBM && VZ) $('p-why').innerHTML = 'Why it matters now: stolen passwords were the top way attackers got in until ' + link(VZ, 'Verizon&rsquo;s 2026 report') + ', where software vulnerabilities (' + COSTS.prices.vulnFirstPct + '%) moved ahead of them; the average breach cost ' + breach + ' in ' + link(IBM, 'IBM&rsquo;s Cost of a Data Breach Report 2026') + ', a record.';
   if (IBM) $('b-breach').textContent = breach + ' (IBM, 2026)';
 }
+
+// ── what the watch stores: its bounds, read from the frozen params and the watch's own defaults ──
+const PW = paramsOf(P);
+$('sec-bounded').innerHTML = '<b>How much it keeps:</b> each identity&rsquo;s watch stores the symbols of its last ' + PW.W + ' actions, the times of its last few dozen, at most ' + PW.maxQuar + ' flagged actions waiting for an answer, at most ' + n0(PW.maxCal) + ' calibration samples, and the learned distributions. It is not a log: it grows until its calibration buffer is full, then its stored size levels off and does not grow with history (<code>test/bounded.test.mjs</code> checks it on a synthetic history long enough to fill the buffer and on one four times as long).';
