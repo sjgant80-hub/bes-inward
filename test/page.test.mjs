@@ -69,12 +69,19 @@ test('every sourced figure the page renders has a primary source and the date it
 test('every input of the cost case reaches the kernel and redraws it', () => {
   const call = app.slice(app.indexOf('const r = costCase('), app.indexOf('if (!r.ok) { blank()'));
   const ins = [...html.slice(html.indexOf('<h3 id="cost">'), html.indexOf('<h3 id="compare">')).matchAll(/<input id="([^"]+)"/g)].map((m) => m[1]);
-  assert.deepEqual(ins, ['c-people', 'c-agents', 'c-actions', 'c-sp', 'c-sa', 'c-min', 'c-setup', 'c-years']);
+  assert.deepEqual(ins, ['c-people', 'c-agents', 'c-actions', 'c-sp', 'c-sa', 'c-min', 'c-setup', 'c-upkeep', 'c-years']);
   for (const id of ins) assert.ok(call.includes("field('" + id + "')"), id + ' reaches costCase');
   const redraw = app.match(/for \(const k of (\[[^\]]+\])\) \$\(k\)\.addEventListener\('input', drawCost\)/);
   assert.ok(redraw, 'the inputs redraw the case');
   assert.deepEqual(JSON.parse(redraw[1].replace(/'/g, '"')), ins);
   assert.match(text, /set-up hours are yours/);
+  assert.match(text, /upkeep hours are yours/);
+  assert.match(app, /upkeep ' \+ pounds\(L\.upkeep\)/);
+});
+
+test('the buyer’s operating questions are answered on the page: alerts, updates, certification', () => {
+  for (const q of ['Where do its alerts go?', 'How do updates reach it?']) assert.ok(html.includes('<summary>' + q + '</summary>'), q);
+  assert.match(text, /No certification report/);
 });
 
 test('the supplier, the terms and the exit are on the page', () => {
