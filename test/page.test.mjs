@@ -69,8 +69,14 @@ test('every sourced figure the page renders has a primary source and the date it
 test('every input of the cost case reaches the kernel and redraws it', () => {
   const call = app.slice(app.indexOf('const r = costCase('), app.indexOf('if (!r.ok) { blank()'));
   const ins = [...html.slice(html.indexOf('<h3 id="cost">'), html.indexOf('<h3 id="compare">')).matchAll(/<input id="([^"]+)"/g)].map((m) => m[1]);
-  assert.deepEqual(ins, ['c-people', 'c-agents', 'c-actions', 'c-sp', 'c-sa', 'c-min', 'c-setup', 'c-upkeep', 'c-years']);
-  for (const id of ins) assert.ok(call.includes("field('" + id + "')"), id + ' reaches costCase');
+  assert.deepEqual(ins, ['c-people', 'c-agents', 'c-actions', 'c-sp', 'c-sa', 'c-min', 'c-hour', 'c-setup', 'c-upkeep', 'c-years']);
+  for (const id of ins.filter((x) => x !== 'c-hour')) assert.ok(call.includes("field('" + id + "')"), id + ' reaches costCase');
+  // the hour: pounds in, pence to the kernel; blank leaves the kernel's own loaded hour; prefilled from the kernel, not typed
+  assert.ok(call.includes('hourPence: hourIn()'), 'c-hour reaches costCase');
+  assert.match(app, /const hourIn = \(\) => \(\$\('c-hour'\)\.value === '' \? undefined : Math\.round\(field\('c-hour'\) \* 100\)\);/);
+  assert.match(app, /if \(HOUR\.ok\) \$\('c-hour'\)\.value = \(HOUR\.pence \/ 100\)\.toFixed\(2\);/);
+  assert.doesNotMatch(html.match(/<input id="c-hour"[^>]*>/)[0], /value=/);
+  assert.match(text, /National Insurance and minimum pension added in full/);
   const redraw = app.match(/for \(const k of (\[[^\]]+\])\) \$\(k\)\.addEventListener\('input', drawCost\)/);
   assert.ok(redraw, 'the inputs redraw the case');
   assert.deepEqual(JSON.parse(redraw[1].replace(/'/g, '"')), ins);
@@ -82,6 +88,14 @@ test('every input of the cost case reaches the kernel and redraws it', () => {
 test('the buyer’s operating questions are answered on the page: alerts, updates, certification', () => {
   for (const q of ['Where do its alerts go?', 'How do updates reach it?']) assert.ok(html.includes('<summary>' + q + '</summary>'), q);
   assert.match(text, /No certification report/);
+  for (const r of ['Someone in control of the machine itself.', 'Where it runs today.']) assert.ok(html.includes('<tr><th>' + r + '</th>'), r);
+});
+
+test('the real key driven by a script, in panel 5, reports what happened beside its button', () => {
+  const h = app.slice(app.indexOf("$('p-thief').addEventListener"), app.indexOf('// The tarpit, shown for real'));
+  assert.match(h, /if \(!W\.simon\) \{ \$\('pktsum'\)\.textContent = /);
+  assert.match(h, /\$\('pktsum'\)\.innerHTML = caught/);
+  assert.doesNotMatch(h, /\$\('kstat'\)/);
 });
 
 test('the supplier, the terms and the exit are on the page', () => {

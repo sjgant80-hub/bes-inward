@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { costCase, measuredRates, over, pounds, BASIS_KEYS, PRICE_KEYS } from '../src/cost.mjs';
+import { costCase, measuredRates, over, pounds, loadedHour, BASIS_KEYS, PRICE_KEYS } from '../src/cost.mjs';
 
 const json = (p) => JSON.parse(readFileSync(new URL(p, import.meta.url), 'utf8'));
 const basis = json('../vendor/sovereign-enterprise/basis.json');
@@ -10,13 +10,16 @@ const prices = sources.prices;
 const real = json('../receipts/real.json');
 const base = { people: 10, agents: 2, actionsPerDay: 5000, msPerAction: 1, stepUpsPerPerson: 1, stepUpsPerAgent: 2, minutesPerStepUp: 1, setupHours: 0, upkeepHoursPerYear: 0, years: 1 };
 const withBasis = (k, v) => ({ ...basis, [k]: { ...basis[k], value: v } });
+const HOUR = 2322;   // 1967p median wage × (1 + 15% employer NI + 3% minimum employer pension) = 2321.06p, rounded UP
 
 test('the figures the case reads are the sourced ones', () => {
-  assert.deepEqual([...BASIS_KEYS], ['wageMedianHourly', 'electricityPencePerKwh', 'fxGbpPerUsd', 'cpi']);
+  assert.deepEqual([...BASIS_KEYS], ['wageMedianHourly', 'employerNiRate', 'pensionEmployerRate', 'electricityPencePerKwh', 'fxGbpPerUsd', 'cpi']);
   assert.deepEqual([...PRICE_KEYS], ['entraP2CentsPerUserMonth', 'workloadIdCentsPerIdentityMonth', 'chipMaxWatts']);
   for (const k of BASIS_KEYS) assert.ok(typeof basis[k].value === 'number' && typeof basis[k].source === 'string', 'basis ' + k);
   for (const k of PRICE_KEYS) assert.ok(sources.sources.some((s) => s.key === k && /^https:\/\//.test(s.url) && s.read), 'a cited source for ' + k);
   assert.equal(basis.wageMedianHourly.value, 19.67);
+  assert.equal(basis.employerNiRate.value, 0.15);
+  assert.equal(basis.pensionEmployerRate.value, 0.03);
   assert.equal(prices.entraP2CentsPerUserMonth, 1000);
   assert.equal(prices.workloadIdCentsPerIdentityMonth, 300);
   assert.equal(prices.chipMaxWatts, 55);
@@ -34,7 +37,7 @@ test('the rented route: each person × Entra ID P2 + each agent × Workload ID, 
   assert.equal(costCase(basis, prices, { ...base, agents: 0 }).perYear.rented, 90475);              // 90475.2: rounded, not up
 });
 
-test('the owned route: electricity at the chip’s maximum draw, rounded up, plus step-ups at the median wage, rounded up', () => {
+test('the owned route: electricity at the chip’s maximum draw, rounded up, plus step-ups at the loaded hour, rounded up', () => {
   const r = costCase(basis, prices, base);
   const kWh = ((5000 * 365 * 1) / 3600000) * 55 / 1000;
   assert.ok(Math.abs(r.lines.kWh - kWh) < 1e-12);
@@ -44,13 +47,15 @@ test('the owned route: electricity at the chip’s maximum draw, rounded up, plu
   assert.equal(costCase(basis, prices, { ...base, actionsPerDay: 2000 }).lines.power, 1);           // 0.273p: rounded UP
   assert.equal(r.lines.stepUps, (10 * 1 + 2 * 2) * 52);
   assert.equal(r.lines.minutes, 728);
-  assert.equal(r.lines.peopleTime, Math.ceil((728 * 1967) / 60));
-  assert.equal(r.lines.peopleTime, 23867);                                                         // 23866.27: rounded UP
+  assert.equal(r.lines.hourPence, HOUR);
+  assert.equal(r.lines.loadedHourPence, HOUR);
+  assert.equal(r.lines.peopleTime, Math.ceil((728 * HOUR) / 60));
+  assert.equal(r.lines.peopleTime, 28174);                                                         // 28173.6: rounded UP
   assert.equal(r.lines.licence, 0);
   assert.equal(r.lines.upkeep, 0);
   assert.equal(r.perYear.owned, r.lines.power + r.lines.peopleTime);
   assert.equal(r.differencePerYear, r.perYear.rented - r.perYear.owned);
-  assert.equal(r.differencePerYear, 72036);
+  assert.equal(r.differencePerYear, 67729);
   const z = costCase(basis, prices, { ...base, msPerAction: 0, stepUpsPerPerson: 0, stepUpsPerAgent: 0 });
   assert.equal(z.perYear.owned, 0);
   assert.equal(costCase(basis, prices, { ...base, minutesPerStepUp: 3 }).lines.minutes, 728 * 3);
@@ -58,12 +63,12 @@ test('the owned route: electricity at the chip’s maximum draw, rounded up, plu
   assert.equal(costCase(basis, prices, { ...base, stepUpsPerPerson: 0 }).lines.stepUps, 208);
 });
 
-test('set-up, once: the reader’s hours at the median wage, rounded up, in the first year of ours only', () => {
+test('set-up, once: the reader’s hours at the loaded hour, rounded up, in the first year of ours only', () => {
   const r = costCase(basis, prices, { ...base, setupHours: 8, years: 3 });
-  assert.equal(r.lines.setup, 8 * 1967);
-  assert.equal(costCase(basis, prices, { ...base, setupHours: 0.001 }).lines.setup, 2);            // 1.967p: rounded UP
+  assert.equal(r.lines.setup, 8 * HOUR);
+  assert.equal(costCase(basis, prices, { ...base, setupHours: 0.001 }).lines.setup, 3);            // 2.322p: rounded UP
   assert.equal(r.perYear.owned, costCase(basis, prices, { ...base, years: 3 }).perYear.owned);     // not a running cost
-  assert.equal(r.over.owned, over(r.perYear.owned, basis.cpi.value, 3, true) + 8 * 1967);
+  assert.equal(r.over.owned, over(r.perYear.owned, basis.cpi.value, 3, true) + 8 * HOUR);
   assert.equal(r.over.rented, costCase(basis, prices, { ...base, years: 3 }).over.rented);         // the rented side is not charged
   assert.equal(r.differenceOver, r.over.rented - r.over.owned);
   assert.equal(r.differencePerYear, r.perYear.rented - r.perYear.owned);
@@ -71,22 +76,65 @@ test('set-up, once: the reader’s hours at the median wage, rounded up, in the 
   assert.equal(costCase(basis, prices, base).lines.setup, 0);
 });
 
-test('upkeep: the reader’s hours a year to keep it running, at the median wage, rounded up, a running cost of ours only', () => {
+test('upkeep: the reader’s hours a year to keep it running, at the loaded hour, rounded up, a running cost of ours only', () => {
   const r = costCase(basis, prices, { ...base, upkeepHoursPerYear: 12, years: 3 });
   const plain = costCase(basis, prices, { ...base, years: 3 });
-  assert.equal(r.lines.upkeep, 12 * 1967);
-  assert.equal(r.perYear.owned, plain.perYear.owned + 12 * 1967);                                 // every year, not once
+  assert.equal(r.lines.upkeep, 12 * HOUR);
+  assert.equal(r.perYear.owned, plain.perYear.owned + 12 * HOUR);                                 // every year, not once
   assert.equal(r.perYear.owned, r.lines.power + r.lines.peopleTime + r.lines.upkeep);
-  assert.equal(r.over.owned, over(plain.perYear.owned + 12 * 1967, basis.cpi.value, 3, true));     // rises by CPI like the rest
+  assert.equal(r.over.owned, over(plain.perYear.owned + 12 * HOUR, basis.cpi.value, 3, true));     // rises by CPI like the rest
   assert.equal(r.perYear.rented, plain.perYear.rented);                                            // the rented side is not charged
   assert.equal(r.over.rented, plain.over.rented);
-  assert.equal(r.differencePerYear, plain.differencePerYear - 12 * 1967);
+  assert.equal(r.differencePerYear, plain.differencePerYear - 12 * HOUR);
   assert.equal(r.lines.setup, 0);
-  assert.equal(costCase(basis, prices, { ...base, upkeepHoursPerYear: 0.001 }).lines.upkeep, 2);   // 1.967p: rounded UP
-  assert.equal(costCase(basis, prices, { ...base, upkeepHoursPerYear: 0.001 }).perYear.owned, plain.perYear.owned + 2);
+  assert.equal(costCase(basis, prices, { ...base, upkeepHoursPerYear: 0.001 }).lines.upkeep, 3);   // 2.322p: rounded UP
+  assert.equal(costCase(basis, prices, { ...base, upkeepHoursPerYear: 0.001 }).perYear.owned, plain.perYear.owned + 3);
   assert.equal(r.inputs.upkeepHoursPerYear, 12);
   const both = costCase(basis, prices, { ...base, setupHours: 8, upkeepHoursPerYear: 12, years: 2 });
-  assert.equal(both.over.owned, over(plain.perYear.owned + 12 * 1967, basis.cpi.value, 2, true) + 8 * 1967);
+  assert.equal(both.over.owned, over(plain.perYear.owned + 12 * HOUR, basis.cpi.value, 2, true) + 8 * HOUR);
+});
+
+test('the loaded hour: the median wage plus employer NI and the minimum employer pension, added in full, rounded up', () => {
+  assert.deepEqual(loadedHour(basis), { ok: true, pence: HOUR, wagePence: 1967, ni: 0.15, pension: 0.03 });
+  assert.equal(Math.ceil(1967 * (1 + 0.15 + 0.03)), HOUR);
+  assert.equal(loadedHour(withBasis('employerNiRate', 0)).pence, 2027);                             // 2026.01: rounded UP
+  assert.equal(loadedHour(withBasis('pensionEmployerRate', 0)).pence, 2263);                        // 2262.05: rounded UP
+  assert.equal(loadedHour({ ...withBasis('employerNiRate', 0), pensionEmployerRate: { value: 0 } }).pence, 1967);
+  assert.equal(loadedHour(withBasis('wageMedianHourly', 10)).pence, 1180);
+  assert.equal(loadedHour(withBasis('employerNiRate', 0.5)).wagePence, 1967);
+  assert.equal(loadedHour(withBasis('employerNiRate', 0.5)).ni, 0.5);
+  assert.equal(loadedHour(withBasis('pensionEmployerRate', 0.05)).pension, 0.05);
+  assert.match(loadedHour(null).why, /basis figure wageMedianHourly/);
+  assert.match(loadedHour(withBasis('employerNiRate', 1)).why, /basis figure employerNiRate/);
+  assert.match(loadedHour(withBasis('cpi', NaN)).why, /basis figure cpi/);
+  assert.equal(loadedHour(withBasis('cpi', NaN)).ok, false);
+  assert.equal(loadedHour({ get wageMedianHourly() { throw new Error('x'); } }).why, 'the basis could not be read');
+  assert.equal(loadedHour(Object.assign([], basis)).ok, false);
+  // the case uses it unless the reader gives their own hour; prices play no part in it
+  const r = costCase(basis, prices, { ...base, setupHours: 2, upkeepHoursPerYear: 3 });
+  assert.equal(r.lines.setup, 2 * HOUR);
+  assert.equal(r.lines.upkeep, 3 * HOUR);
+  assert.equal(r.inputs.hourPence, HOUR);
+});
+
+test('the reader’s own hour replaces the loaded one on every line of ours, never on the rented side', () => {
+  const mine = { ...base, setupHours: 2, upkeepHoursPerYear: 3, hourPence: 6000 };
+  const r = costCase(basis, prices, mine);
+  assert.equal(r.ok, true);
+  assert.equal(r.lines.hourPence, 6000);
+  assert.equal(r.lines.loadedHourPence, HOUR);
+  assert.equal(r.lines.peopleTime, Math.ceil((728 * 6000) / 60));
+  assert.equal(r.lines.upkeep, 18000);
+  assert.equal(r.lines.setup, 12000);
+  assert.equal(r.inputs.hourPence, 6000);
+  assert.equal(r.perYear.rented, 95904);
+  assert.equal(r.perYear.owned, r.lines.power + r.lines.peopleTime + 18000);
+  const free = costCase(basis, prices, { ...mine, hourPence: 0 });
+  assert.equal(free.ok, true);
+  assert.equal(free.perYear.owned, free.lines.power);
+  assert.equal(free.lines.setup, 0);
+  assert.equal(costCase(basis, prices, { ...base, hourPence: 0.5 }).lines.peopleTime, Math.ceil((728 * 0.5) / 60));
+  assert.equal(costCase(basis, prices, { ...base, hourPence: undefined }).lines.hourPence, HOUR);
 });
 
 test('over the years: each later year rises by CPI, each year rounded (up on our side)', () => {
@@ -102,7 +150,7 @@ test('over the years: each later year rises by CPI, each year rounded (up on our
   assert.equal(costCase(basis, prices, base).over.rented, 95904);
   assert.equal(costCase(withBasis('cpi', 0), prices, { ...base, years: 2 }).over.rented, 2 * 95904);  // a CPI of 0 is a figure, not a gap
   assert.equal(r.inputs.years, 3);
-  assert.deepEqual(r.inputs, { ...base, years: 3 });
+  assert.deepEqual(r.inputs, { ...base, years: 3, hourPence: HOUR });
 });
 
 test('the case refuses what it cannot compute', () => {
@@ -125,6 +173,14 @@ test('the case refuses what it cannot compute', () => {
     assert.match(costCase({ ...basis, [k]: 5 }, prices, base).why, new RegExp(k));
   }
   for (const bad of [-0.01, NaN, undefined]) assert.match(costCase(withBasis('cpi', bad), prices, base).why, /basis figure cpi/);
+  for (const k of ['employerNiRate', 'pensionEmployerRate']) {
+    for (const bad of [-0.01, 1, 1.5, NaN, Infinity, '0.15', undefined, null]) assert.match(costCase(withBasis(k, bad), prices, base).why, new RegExp('basis figure ' + k), k + ' ' + bad);
+    assert.match(costCase({ ...basis, [k]: 0.15 }, prices, base).why, new RegExp(k));
+    assert.equal(costCase(withBasis(k, 0), prices, base).ok, true);                                  // a rate of 0 is a figure
+    assert.equal(costCase(withBasis(k, 0.999), prices, base).ok, true);
+  }
+  assert.match(costCase(withBasis('wageMedianHourly', 0), prices, base).why, /wageMedianHourly/);   // the wage is read before the rates
+  for (const bad of [-1, NaN, Infinity, '2322', null]) assert.match(costCase(basis, prices, { ...base, hourPence: bad }).why, /hourPence is a number ≥ 0/, 'hourPence ' + bad);
   for (const k of PRICE_KEYS) {
     for (const bad of [0, -1, 1.5, '1000', undefined]) assert.match(costCase(basis, { ...prices, [k]: bad }, base).why, new RegExp('sourced price ' + k));
   }

@@ -5,8 +5,10 @@
 //
 // Two sourced files, every figure cited on the page beside the numbers:
 //   basis  = vendor/sovereign-enterprise/basis.json — the estate's shared sourced basis, vendored byte for byte and
-//            re-hashed in CI (tools/vendor.mjs --check): the UK median hourly wage (ONS), CPI (ONS), business electricity
-//            (DESNZ) and the exchange rate (ECB). The same file the estate's other cost cases read (liveware mintcase).
+//            re-hashed in CI (tools/vendor.mjs --check): the UK median hourly wage (ONS), the employer's National
+//            Insurance rate (HMRC) and minimum pension contribution (The Pensions Regulator), CPI (ONS), business
+//            electricity (DESNZ) and the exchange rate (ECB). The same file the estate's other cost cases read
+//            (liveware mintcase).
 //   prices = costs/sources.json — what this case needs that the shared basis does not carry: the published prices of
 //            the rented route (Microsoft Entra ID P2 for each person, Microsoft Entra Workload ID for each AI agent)
 //            and the chip's maximum draw.
@@ -17,18 +19,25 @@
 //             stepUpsPerPerson, stepUpsPerAgent (a week each, answered by a person), minutesPerStepUp,
 //             setupHours (the reader's own estimate of the hours to install and roll it out, once),
 //             upkeepHoursPerYear (the reader's own estimate of the hours a year to keep it running: taking updates,
-//             switching tiers on, reading its alerts), years (1 to 10) }
+//             switching tiers on, reading its alerts), years (1 to 10),
+//             hourPence (optional: what an hour of the reader's people costs them, in pence; when it is left out,
+//             the loaded hour below) }
 //
-// Money is whole pence (integers). Floors on the rented side, never top ends on ours:
+// Money is whole pence (integers). Floors on the rented side; on ours, never an understatement:
+//   the hour      = the UK median hourly wage plus the employer's on-costs on it, both added in full: National
+//                   Insurance at its rate above the threshold and the minimum employer pension; rounded UP. For pay
+//                   outside those bands the true on-cost is lower, so the hour never understates ours.
 //   rented a year = (people × the P2 price + agents × the Workload ID price) × 12, US cents × £ per $ = pence, rounded
 //   owned a year  = electricity: CPU-hours × the chip's MAXIMUM draw × business pence per kWh, rounded UP
-//                 + people's time: every step-up a week × 52 × minutes, at the UK median hourly wage, rounded UP
-//                 + upkeep: the reader's hours a year to keep it running, at the UK median hourly wage, rounded UP
+//                 + people's time: every step-up a week × 52 × minutes, at the hour, rounded UP
+//                 + upkeep: the reader's hours a year to keep it running, at the hour, rounded UP
 //                 + licence 0
-//   set-up, once  = setupHours at the UK median hourly wage, rounded UP, added to the first year of ours only (the
-//                   rented route's own set-up is not counted, so the comparison never flatters ours; nor is its own
-//                   administration, against which ours carries its upkeep)
+//   set-up, once  = setupHours at the hour, rounded UP, added to the first year of ours only (the rented route's own
+//                   set-up is not counted, so the comparison never flatters ours; nor is its own administration,
+//                   against which ours carries its upkeep)
 //   over `years`: each later year rises by CPI (the basis's own rule), each year's pence rounded the same way.
+//
+//   loadedHour(basis) → { ok, pence, wagePence, ni, pension } — the hour above, for a page to show and prefill.
 //
 //   measuredRates(receipt, fromIso, toIso) → { ok, weeks, perPerson, perAgent } — the step-up rates the real
 //   measurement saw (distinct times asked + big shifts confirmed), a week, over the sealed test period.
@@ -39,17 +48,38 @@ const fin = (x) => typeof x === 'number' && Number.isFinite(x) && x >= 0;
 const pos = (x) => fin(x) && x > 0;
 const WEEK = 7 * 86400000;
 
-export const BASIS_KEYS = Object.freeze(['wageMedianHourly', 'electricityPencePerKwh', 'fxGbpPerUsd', 'cpi']);
+export const BASIS_KEYS = Object.freeze(['wageMedianHourly', 'employerNiRate', 'pensionEmployerRate', 'electricityPencePerKwh', 'fxGbpPerUsd', 'cpi']);
 export const PRICE_KEYS = Object.freeze(['entraP2CentsPerUserMonth', 'workloadIdCentsPerIdentityMonth', 'chipMaxWatts']);
+const rate = (x) => fin(x) && x < 1;
+
+/** the basis figures the case reads, or the name of the first one missing */
+function basisFigures(basis) {
+  const b = isObj(basis) ? basis : {};
+  const v = (k) => (isObj(b[k]) ? b[k].value : undefined);
+  for (const k of ['wageMedianHourly', 'electricityPencePerKwh', 'fxGbpPerUsd']) if (!pos(v(k))) return { why: 'the sourced basis figure ' + k + ' is missing' };
+  for (const k of ['employerNiRate', 'pensionEmployerRate']) if (!rate(v(k))) return { why: 'the sourced basis figure ' + k + ' is missing' };
+  if (!fin(v('cpi'))) return { why: 'the sourced basis figure cpi is missing' };
+  const wagePence = Math.round(v('wageMedianHourly') * 100), ni = v('employerNiRate'), pension = v('pensionEmployerRate');
+  return { f: { wagePence, ni, pension, hourPence: Math.ceil(wagePence * (1 + ni + pension)), pencePerKwh: v('electricityPencePerKwh'), fx: v('fxGbpPerUsd'), cpi: v('cpi') } };
+}
 
 /** the figures the case reads, or the name of the first one missing */
 function figures(basis, prices) {
-  const b = isObj(basis) ? basis : {}, p = isObj(prices) ? prices : {};
-  const v = (k) => (isObj(b[k]) ? b[k].value : undefined);
-  for (const k of ['wageMedianHourly', 'electricityPencePerKwh', 'fxGbpPerUsd']) if (!pos(v(k))) return { why: 'the sourced basis figure ' + k + ' is missing' };
-  if (!fin(v('cpi'))) return { why: 'the sourced basis figure cpi is missing' };
+  const got = basisFigures(basis);
+  if (!got.f) return got;
+  const p = isObj(prices) ? prices : {};
   for (const k of PRICE_KEYS) if (!whole(p[k]) || p[k] === 0) return { why: 'the sourced price ' + k + ' is missing' };
-  return { f: { wagePence: Math.round(v('wageMedianHourly') * 100), pencePerKwh: v('electricityPencePerKwh'), fx: v('fxGbpPerUsd'), cpi: v('cpi'), p2: p.entraP2CentsPerUserMonth, wl: p.workloadIdCentsPerIdentityMonth, watts: p.chipMaxWatts } };
+  return { f: { ...got.f, p2: p.entraP2CentsPerUserMonth, wl: p.workloadIdCentsPerIdentityMonth, watts: p.chipMaxWatts } };
+}
+
+/** What an hour of a median employee costs the employer: the median wage plus employer NI and the minimum employer
+ *  pension on it, in whole pence, rounded up. */
+export function loadedHour(basis) {
+  try {
+    const got = basisFigures(basis);
+    if (!got.f) return { ok: false, why: got.why };
+    return { ok: true, pence: got.f.hourPence, wagePence: got.f.wagePence, ni: got.f.ni, pension: got.f.pension };
+  } catch { return { ok: false, why: 'the basis could not be read' }; }
 }
 
 /** a yearly cost in pence over `years`, each later year × (1 + cpi), each year rounded (up when `up`) */
@@ -67,6 +97,8 @@ export function costCase(basis, prices, input) {
     for (const k of ['people', 'agents', 'actionsPerDay']) if (!whole(i[k])) return { ok: false, why: k + ' is a whole number' };
     for (const k of ['msPerAction', 'stepUpsPerPerson', 'stepUpsPerAgent', 'minutesPerStepUp', 'setupHours', 'upkeepHoursPerYear']) if (!fin(i[k])) return { ok: false, why: k + ' is a number ≥ 0' };
     if (!Number.isInteger(i.years) || i.years < 1 || i.years > 10) return { ok: false, why: 'years is a whole number from 1 to 10' };
+    if (i.hourPence !== undefined && !fin(i.hourPence)) return { ok: false, why: 'hourPence is a number ≥ 0' };
+    const hour = i.hourPence === undefined ? f.hourPence : i.hourPence;
     const cents = (i.people * f.p2 + i.agents * f.wl) * 12;
     const rented = Math.round(cents * f.fx);                                           // US cents × £ per $ = pence
     const cpuHours = (i.actionsPerDay * 365 * i.msPerAction) / 3600000;
@@ -74,16 +106,16 @@ export function costCase(basis, prices, input) {
     const power = Math.ceil(kWh * f.pencePerKwh);                                      // round UP: never understate ours
     const stepUps = (i.people * i.stepUpsPerPerson + i.agents * i.stepUpsPerAgent) * 52;
     const minutes = stepUps * i.minutesPerStepUp;
-    const peopleTime = Math.ceil((minutes * f.wagePence) / 60);
-    const upkeep = Math.ceil(i.upkeepHoursPerYear * f.wagePence);                       // a running cost: round UP
+    const peopleTime = Math.ceil((minutes * hour) / 60);
+    const upkeep = Math.ceil(i.upkeepHoursPerYear * hour);                              // a running cost: round UP
     const owned = power + peopleTime + upkeep;
-    const setup = Math.ceil(i.setupHours * f.wagePence);                                // once, in the first year
+    const setup = Math.ceil(i.setupHours * hour);                                       // once, in the first year
     const total = { rented: over(rented, f.cpi, i.years, false), owned: over(owned, f.cpi, i.years, true) + setup };
     return {
       ok: true,
-      inputs: { people: i.people, agents: i.agents, actionsPerDay: i.actionsPerDay, msPerAction: i.msPerAction, stepUpsPerPerson: i.stepUpsPerPerson, stepUpsPerAgent: i.stepUpsPerAgent, minutesPerStepUp: i.minutesPerStepUp, setupHours: i.setupHours, upkeepHoursPerYear: i.upkeepHoursPerYear, years: i.years },
+      inputs: { people: i.people, agents: i.agents, actionsPerDay: i.actionsPerDay, msPerAction: i.msPerAction, stepUpsPerPerson: i.stepUpsPerPerson, stepUpsPerAgent: i.stepUpsPerAgent, minutesPerStepUp: i.minutesPerStepUp, setupHours: i.setupHours, upkeepHoursPerYear: i.upkeepHoursPerYear, years: i.years, hourPence: hour },
       perYear: { rented, owned },
-      lines: { rentedPeople: Math.round(i.people * f.p2 * 12 * f.fx), rentedAgents: Math.round(i.agents * f.wl * 12 * f.fx), licence: 0, power, peopleTime, upkeep, setup, cpuHours, kWh, stepUps, minutes },
+      lines: { rentedPeople: Math.round(i.people * f.p2 * 12 * f.fx), rentedAgents: Math.round(i.agents * f.wl * 12 * f.fx), licence: 0, power, peopleTime, upkeep, setup, cpuHours, kWh, stepUps, minutes, hourPence: hour, loadedHourPence: f.hourPence },
       over: total,
       differencePerYear: rented - owned,
       differenceOver: total.rented - total.owned,

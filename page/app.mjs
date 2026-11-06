@@ -9,7 +9,7 @@ import { trust } from '../src/trust.mjs';
 import { envelopeBody, materialOf, approvalMaterialOf, approvalFor, admits } from '../src/envelope.mjs';
 import { recoveryBody, recoveryMaterialOf, applyRecovery } from '../src/recovery.mjs';
 import { emptyNode, receive, sha256hex } from '../src/stack.mjs';
-import { costCase, measuredRates, pounds, BASIS_KEYS } from '../src/cost.mjs';
+import { costCase, measuredRates, loadedHour, pounds, BASIS_KEYS } from '../src/cost.mjs';
 import { makeIdentity, verifyBytes } from '../vendor/fall-kit-core/identity.mjs';
 import { prepare, finish, frame, KINDS } from '../vendor/fall-kit-core/vendor/light/packet.mjs';
 
@@ -279,9 +279,14 @@ $('p-forged').addEventListener('click', async () => { const b = (await pkt(simon
 $('p-foreign').addEventListener('click', async () => { await deliver('not LIGHT', crypto.getRandomValues(new Uint8Array(120)), clock); });
 $('p-replay').addEventListener('click', async () => { if (!lastGood) { lastGood = await pkt(simon, asAction(ownShape())); await deliver('genuine', lastGood, clock); } await deliver('replay', lastGood, clock + 1000); });
 $('p-thief').addEventListener('click', async () => {
-  if (!W.simon) { $('kstat').textContent = 'Grow the baselines first, so the owner&rsquo;s watch knows him.'.replace('&rsquo;', '’'); return; }
+  if (!W.simon) { $('pktsum').textContent = 'Grow the baselines first (panel 1), so the owner’s watch knows him.'; return; }
   const xs = S.simon.filter((e) => e.t >= END - 14 * DAY).slice(-10);
-  for (let i = 0; i < xs.length; i++) { clock += 60000; const r = await deliver('thief ' + (i + 1), await pkt(simon, asAction(xs[i])), clock); if (!r.out.admitted) break; }
+  let caught = null, sent = 0;
+  for (let i = 0; i < xs.length; i++) { clock += 60000; const r = await deliver('thief ' + (i + 1), await pkt(simon, asAction(xs[i])), clock); sent = i + 1; if (!r.out.admitted) { caught = r.out; break; } }
+  const what = 'A script drove the owner&rsquo;s real key, sending his own last ' + xs.length + ' recorded requests one a minute. ';
+  $('pktsum').innerHTML = caught
+    ? what + 'Every signature verified; packet ' + sent + ' was refused at ' + esc(caught.layer) + ' (' + esc(caught.why) + ')' + (caught.immune ? (caught.immune.novel ? ' and the immune system learned it as a new ' + esc(caught.immune.family) + ' antibody' : ' and the immune system recognised it by the ' + esc(caught.immune.family) + ' antibody it already held') : '') + '. The packets before it were admitted: each is judged on its own as it arrives, and a script&rsquo;s rhythm shows only once it has made a few gaps.'
+    : what + 'Every one was admitted: this script was not caught. <a href="#results">Results</a> shows how often that happens on real behaviour.';
 });
 // The tarpit, shown for real: one source sends the same forged packet until break-it's rebound ladder says it owes
 // work, then pays that work in this tab to buy one more look. Every number is read from the vendored kernel.
@@ -317,10 +322,14 @@ const RATES = measuredRates(REAL, TEST_FROM, TEST_TO);
 if (RATES.ok) { $('c-sp').value = RATES.perPerson.toFixed(2); $('c-sa').value = RATES.perAgent.toFixed(2); }
 const times = (n) => (n === 1 ? 'once' : n + ' times');
 const field = (id) => ($(id).value === '' ? 0 : Number($(id).value));
+// the hour starts at the basis's loaded median (src/cost.mjs loadedHour); left blank, the kernel uses that same hour
+const HOUR = BASIS ? loadedHour(BASIS) : { ok: false };
+if (HOUR.ok) $('c-hour').value = (HOUR.pence / 100).toFixed(2);
+const hourIn = () => ($('c-hour').value === '' ? undefined : Math.round(field('c-hour') * 100));
 function drawCost() {
   const blank = () => { for (const k of ['c-rented', 'c-bes', 'c-save']) $(k).textContent = '—'; for (const k of ['c-rented-n', 'c-bes-n', 'c-save-n']) $(k).textContent = ''; };
   if (!COSTS || !BASIS) { blank(); $('c-lines').textContent = 'The sourced figures did not load, so there is no case to show.'; return; }
-  const r = costCase(BASIS, COSTS.prices, { people: field('c-people'), agents: field('c-agents'), actionsPerDay: field('c-actions'), msPerAction, stepUpsPerPerson: field('c-sp'), stepUpsPerAgent: field('c-sa'), minutesPerStepUp: field('c-min'), setupHours: field('c-setup'), upkeepHoursPerYear: field('c-upkeep'), years: field('c-years') });
+  const r = costCase(BASIS, COSTS.prices, { people: field('c-people'), agents: field('c-agents'), actionsPerDay: field('c-actions'), msPerAction, stepUpsPerPerson: field('c-sp'), stepUpsPerAgent: field('c-sa'), minutesPerStepUp: field('c-min'), setupHours: field('c-setup'), upkeepHoursPerYear: field('c-upkeep'), years: field('c-years'), hourPence: hourIn() });
   if (!r.ok) { blank(); $('c-lines').textContent = 'Check the inputs: ' + r.why + '.'; return; }
   const PR = COSTS.prices, B = BASIS, i = r.inputs, L = r.lines, yrs = i.years + (i.years === 1 ? ' year' : ' years');
   $('c-rented').textContent = pounds(r.perYear.rented); $('c-bes').textContent = pounds(r.perYear.owned); $('c-save').textContent = pounds(r.differencePerYear);
@@ -328,15 +337,18 @@ function drawCost() {
   $('c-bes-n').textContent = 'over ' + yrs + ', set-up included: ' + pounds(r.over.owned) + (L.setup ? ' (' + pounds(L.setup) + ' of it is the set-up, once)' : '');
   $('c-save-n').textContent = 'over ' + yrs + ', set-up included: ' + pounds(r.differenceOver);
   const many = (n, one, more) => n + ' ' + (n === 1 ? one : more);
+  const hourText = L.hourPence === L.loadedHourPence
+    ? pounds(L.hourPence) + ' an hour: the UK median wage of £' + B.wageMedianHourly.value.toFixed(2) + ' plus the employer&rsquo;s National Insurance (' + Math.round(100 * B.employerNiRate.value) + '%) and minimum pension (' + Math.round(100 * B.pensionEmployerRate.value) + '%) on it, both added in full so it never understates ours'
+    : 'your own ' + pounds(L.hourPence) + ' an hour';
   $('c-lines').innerHTML = '<b>Rented:</b> ' + many(i.people, 'person', 'people') + ' × '+ usd(PR.entraP2CentsPerUserMonth) + ' a month (' + link(srcOf('entraP2CentsPerUserMonth'), 'Entra ID P2') + ') + ' + many(i.agents, 'agent', 'agents') + ' × ' + usd(PR.workloadIdCentsPerIdentityMonth) + ' a month (' + link(srcOf('workloadIdCentsPerIdentityMonth'), 'Entra Workload ID') + '), × 12, at £' + B.fxGbpPerUsd.value + ' to the dollar = ' + pounds(L.rentedPeople) + ' + ' + pounds(L.rentedAgents) + '. '
-    + '<b>The BES layer:</b> no licence fee; electricity ' + pounds(L.power) + ' for ' + L.cpuHours.toFixed(3) + ' CPU-hours a year at the chip&rsquo;s ' + PR.chipMaxWatts + ' W maximum and ' + B.electricityPencePerKwh.value + 'p a kWh (' + msPerAction.toFixed(3) + ' ms an action, ' + (measured ? 'measured in this tab' : 'an estimate until you grow the baselines, then measured in this tab') + '); people&rsquo;s time ' + pounds(L.peopleTime) + ' for ' + many(Math.round(L.stepUps), 'step-up', 'step-ups') + ' a year × ' + i.minutesPerStepUp + ' min at the UK median wage of £' + B.wageMedianHourly.value.toFixed(2) + ' an hour; upkeep ' + pounds(L.upkeep) + ' for ' + many(i.upkeepHoursPerYear, 'hour', 'hours') + ' a year at the same wage. <b>Set-up, once:</b> ' + i.setupHours + ' hours at the same wage = ' + pounds(L.setup) + ', in the first year of ours only. Each later year rises by CPI, ' + (100 * B.cpi.value).toFixed(1) + '%. '
-    + (RATES.ok ? '<b>The step-up rates</b> start at what the real measurement saw over ' + RATES.weeks.toFixed(1) + ' weeks (' + day(TEST_FROM, true) + ' to ' + day(TEST_TO, true) + '): the owner was asked ' + times(Math.round(RATES.perPerson * RATES.weeks)) + ', ' + RATES.perPerson.toFixed(2) + ' a week; his agent ' + times(Math.round(RATES.perAgent * RATES.weeks)) + ', ' + RATES.perAgent.toFixed(2) + ' a week. One owner and one agent is a small sample: put in your own.' : 'The real receipt did not load; put in your own step-up rates.');
+    + '<b>The BES layer:</b> no licence fee; electricity ' + pounds(L.power) + ' for ' + L.cpuHours.toFixed(3) + ' CPU-hours a year at the chip&rsquo;s ' + PR.chipMaxWatts + ' W maximum and ' + B.electricityPencePerKwh.value + 'p a kWh (' + msPerAction.toFixed(3) + ' ms an action, ' + (measured ? 'measured in this tab' : 'an estimate until you grow the baselines, then measured in this tab') + '); people&rsquo;s time ' + pounds(L.peopleTime) + ' for ' + many(Math.round(L.stepUps), 'step-up', 'step-ups') + ' a year × ' + i.minutesPerStepUp + ' min at ' + hourText + '; upkeep ' + pounds(L.upkeep) + ' for ' + many(i.upkeepHoursPerYear, 'hour', 'hours') + ' a year at the same hour. <b>Set-up, once:</b> ' + i.setupHours + ' hours at the same hour = ' + pounds(L.setup) + ', in the first year of ours only. Each later year rises by CPI, ' + (100 * B.cpi.value).toFixed(1) + '%. '
+    + (RATES.ok ? '<b>The step-up rates</b> start at what the real measurement saw over ' + RATES.weeks.toFixed(1) + ' weeks (' + day(TEST_FROM, true) + ' to ' + day(TEST_TO, true) + '): the owner was asked to confirm something ' + times(Math.round(RATES.perPerson * RATES.weeks)) + ', ' + RATES.perPerson.toFixed(2) + ' a week; his agent ' + times(Math.round(RATES.perAgent * RATES.weeks)) + ', ' + RATES.perAgent.toFixed(2) + ' a week (each distinct step-up and each big shift confirmed counts once). One owner and one agent is a small sample: put in your own.' : 'The real receipt did not load; put in your own step-up rates.');
 }
 const basisLine = (k) => { const b = BASIS && BASIS[k]; return b ? '<li>' + esc(b.what || b.product || k) + ' — <a href="' + esc(b.source) + '">source</a>' + (b.via ? ' (' + esc(b.via) + ')' : '') + '</li>' : ''; };
 $('c-src').innerHTML = (BASIS ? BASIS_KEYS.map(basisLine).join('') : '<li>the shared basis did not load</li>')
   + SRC.filter((s) => ['entraP2CentsPerUserMonth', 'workloadIdCentsPerIdentityMonth', 'chipMaxWatts'].includes(s.key)).map((s) => '<li>' + esc(s.what) + ' — <a href="' + esc(s.url) + '">source</a>, read ' + esc(day(s.read, true)) + '</li>').join('')
-  + '<li>The wage, CPI, electricity and exchange rate are the estate&rsquo;s shared basis, <a href="https://github.com/sjgant80-hub/bes-inward/blob/main/vendor/sovereign-enterprise/basis.json">vendored byte for byte</a> and re-hashed in CI. None of this is a price for the BES layer.</li>';
-for (const k of ['c-people', 'c-agents', 'c-actions', 'c-sp', 'c-sa', 'c-min', 'c-setup', 'c-upkeep', 'c-years']) $(k).addEventListener('input', drawCost);
+  + '<li>The wage, the employer&rsquo;s National Insurance and pension rates, CPI, electricity and the exchange rate are the estate&rsquo;s shared basis, <a href="https://github.com/sjgant80-hub/bes-inward/blob/main/vendor/sovereign-enterprise/basis.json">vendored byte for byte</a> and re-hashed in CI. None of this is a price for the BES layer.</li>';
+for (const k of ['c-people', 'c-agents', 'c-actions', 'c-sp', 'c-sa', 'c-min', 'c-hour', 'c-setup', 'c-upkeep', 'c-years']) $(k).addEventListener('input', drawCost);
 drawCost();
 
 // ── against what you pay now: the sourced prices and statistics, rendered from costs/sources.json ──
